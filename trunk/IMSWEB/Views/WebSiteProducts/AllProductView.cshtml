@@ -7,36 +7,7 @@
 @using System.Globalization
 @using System.Linq
 @{
-    var placeholderImage = Url.Content("~/Content/images/product-placeholder.svg");
-    Func<string, string> resolveAsset = path =>
-    {
-        if (string.IsNullOrWhiteSpace(path))
-        {
-            return placeholderImage;
-        }
-
-        if (path.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-        {
-            return path;
-        }
-
-        if (path.StartsWith("~/", StringComparison.OrdinalIgnoreCase))
-        {
-            return Url.Content(path);
-        }
-
-        if (path.StartsWith("/", StringComparison.OrdinalIgnoreCase))
-        {
-            return Url.Content("~" + path);
-        }
-
-        return Url.Content("~/" + path.TrimStart('/'));
-    };
-
-    var productSamples = (Model ?? Enumerable.Empty<IMSWEB.WebsiteProductViewModels>())
-        .OrderByDescending(x => x.CreateDate)
-        .Take(9)
-        .ToList();
+    var productSamples = Model?.OrderBy(x => Guid.NewGuid()).Take(9).ToList() ?? new List<IMSWEB.WebsiteProductViewModels>();
 }
 
 <style>
@@ -158,45 +129,6 @@
         gap: 0.75rem;
     }
 
-    .product-card__meta {
-        display: flex;
-        flex-direction: column;
-        gap: 0.4rem;
-        color: #64748b;
-        font-weight: 500;
-        font-size: 0.85rem;
-        margin-top: 0.35rem;
-    }
-
-    .product-card__meta-item {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.35rem;
-    }
-
-    .product-card__cta {
-        margin-top: 0.75rem;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.4rem;
-        padding: 0.55rem 1.35rem;
-        border-radius: 999px;
-        background: linear-gradient(135deg, #0ea5e9, #22c55e);
-        color: #fff;
-        font-weight: 600;
-        text-decoration: none;
-        transition: transform 0.25s ease, box-shadow 0.25s ease;
-        box-shadow: 0 15px 30px -20px rgba(14, 165, 233, 0.8);
-    }
-
-    .product-card__cta:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 18px 35px -18px rgba(34, 197, 94, 0.6);
-        color: #fff;
-    }
-
     .product-card__price {
         font-size: 1.35rem;
         font-weight: 700;
@@ -279,33 +211,25 @@
     </div>
 
     <div class="row g-4" id="hideForCategoryProduct">
-        @if (productSamples != null && productSamples.Any())
+        @if (productSamples.Any())
         {
             for (var index = 0; index < productSamples.Count; index++)
             {
                 var item = productSamples[index];
                 var delayStr = (index * 0.1).ToString("0.0", CultureInfo.InvariantCulture);
-                var imagePath = resolveAsset(item.DocumentPath);
-                var detailUrl = Url.Action("GetProductDetails", "WebSiteProducts", new { id = item.Id });
-                var displayPrice = item.Price > 0 ? $"৳ {item.Price.ToString("N0")}" : item.FormattedPrice;
                 <div class="col-12 col-sm-6 col-lg-4 fade-in" style="animation-delay:@(delayStr + "s")">
                     <div class="product-card">
                         <div class="product-card__image">
-                            <a href="@detailUrl">
-                                <img src="@imagePath" alt="@item.Title" />
+                            <a href="@Url.Action("GetProductDetails", "WebSiteProducts", new { id = item.Id })">
+                                <img src="@item.DocumentPath" alt="@item.Title" />
                             </a>
-                            <span class="product-card__badge">@item.CategoryDisplay</span>
+                            <span class="product-card__badge">New</span>
                         </div>
                         <div class="product-card__body text-center">
-                            <p class="product-card__price">@displayPrice</p>
+                            <p class="product-card__price">৳ @item.Price.ToString("N0")</p>
                             <h3 class="product-card__title">
-                                <a href="@detailUrl">@item.Title</a>
+                                <a>@item.Title</a>
                             </h3>
-                            <div class="product-card__meta">
-                                <span class="product-card__meta-item"><i class="fa-solid fa-building me-2"></i>@item.ConcernDisplay</span>
-                                <span class="product-card__meta-item"><i class="fa-regular fa-calendar me-2"></i>@item.CreateDate.ToString("dd MMM yyyy")</span>
-                            </div>
-                            <a class="product-card__cta" href="@detailUrl">View details</a>
                         </div>
                     </div>
                 </div>
@@ -319,57 +243,10 @@
 </div>
 
 <script>
-    var placeholderImage = '@placeholderImage';
-    var detailBaseUrl = '@Url.Action("GetProductDetails", "WebSiteProducts")';
-
     function setActiveFilter(element) {
-        if (!element) {
-            return;
-        }
+        if (!element) return;
         $(".filter-pill").removeClass("active");
         $(element).addClass("active");
-    }
-
-    function resolveImageUrl(path) {
-        if (!path) {
-            return placeholderImage;
-        }
-
-        if (/^https?:\/\//i.test(path)) {
-            return path;
-        }
-
-        var normalized = path.replace(/~/g, '').trim();
-        if (!normalized.startsWith('/')) {
-            normalized = '/' + normalized.replace(/^\/+/, '');
-        }
-
-        return normalized;
-    }
-
-    function formatPrice(value, fallback) {
-        var priceValue = parseFloat(value);
-        if (!isNaN(priceValue) && priceValue > 0) {
-            return priceValue.toLocaleString();
-        }
-        return fallback || 'On request';
-    }
-
-    function formatDate(value) {
-        if (!value) {
-            return 'New arrival';
-        }
-
-        var date = new Date(value);
-        if (isNaN(date.getTime())) {
-            return 'New arrival';
-        }
-
-        return date.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
-    }
-
-    function safeText(value) {
-        return $('<div/>').text(value || '').html();
     }
 
     function renderProducts(products) {
@@ -384,42 +261,22 @@
             }).slice(0, 9);
 
             var delay = 0;
-            sortedItems.forEach(function (item) {
+            randomItems.forEach(function (item) {
                 var delayStr = delay.toFixed(1);
-                var productId = item.Id || item.id;
-                if (!productId) {
-                    return;
-                }
-                var detailUrl = detailBaseUrl + '/' + productId;
-                var priceLabel = formatPrice(item.Price || item.price, item.FormattedPrice || item.formattedPrice);
-                var priceDisplay = priceLabel === 'On request' ? priceLabel : '৳ ' + priceLabel;
-                var categoryLabel = item.CategoryDisplay || item.categoryDisplay || item.ProcutCategory || item.procutCategory || 'Featured';
-                var concernLabel = item.ConcernDisplay || item.concernDisplay || item.ConcernName || item.concernName || (item.ConcernID ? 'Concern #' + item.ConcernID : 'General');
-                var listedDate = formatDate(item.CreateDate || item.createDate);
-                var safeTitle = safeText(item.Title || item.title);
-                var imageUrl = resolveImageUrl(item.DocumentPath || item.documentPath);
-
-                var card = '' +
-                    '<div class="col-12 col-sm-6 col-lg-4 fade-in" style="animation-delay:' + delayStr + 's">' +
-                    '  <div class="product-card">' +
-                    '    <div class="product-card__image">' +
-                    '      <a href="' + detailUrl + '">' +
-                    '        <img src="' + imageUrl + '" alt="' + safeTitle + '">' +
-                    '      </a>' +
-                    '      <span class="product-card__badge">' + safeText(categoryLabel) + '</span>' +
-                    '    </div>' +
-                    '    <div class="product-card__body text-center">' +
-                    '      <p class="product-card__price">' + safeText(priceDisplay) + '</p>' +
-                    '      <h3 class="product-card__title"><a href="' + detailUrl + '">' + safeTitle + '</a></h3>' +
-                    '      <div class="product-card__meta">' +
-                    '        <span class="product-card__meta-item"><i class="fa-solid fa-building me-2"></i>' + safeText(concernLabel) + '</span>' +
-                    '        <span class="product-card__meta-item"><i class="fa-regular fa-calendar me-2"></i>' + safeText(listedDate) + '</span>' +
-                    '      </div>' +
-                    '      <a class="product-card__cta" href="' + detailUrl + '">View details</a>' +
-                    '    </div>' +
-                    '  </div>' +
-                    '</div>';
-
+                var priceValue = parseFloat(item.Price);
+                var formattedPrice = isNaN(priceValue) ? item.Price : priceValue.toLocaleString();
+                var card = '<div class="col-12 col-sm-6 col-lg-4 fade-in" style="animation-delay:' + delayStr + 's">' +
+                    '<div class="product-card">' +
+                    '<div class="product-card__image">' +
+                    '<a href="/WebSiteProducts/GetProductDetails/' + item.Id + '">' +
+                    '<img src="' + item.DocumentPath + '" alt="' + item.Title + '">' +
+                    '</a>' +
+                    '<span class="product-card__badge">New</span>' +
+                    '</div>' +
+                    '<div class="product-card__body text-center">' +
+                    '<p class="product-card__price">৳ ' + formattedPrice + '</p>' +
+                    '<h3 class="product-card__title">' + item.Title + '</h3>' +
+                    '</div></div></div>';
                 container.append(card);
                 delay += 0.1;
             });
@@ -461,7 +318,7 @@
 
     $(document).ready(function () {
         var activeFilter = document.querySelector('.filter-pill.active');
-        if (!$('#hideForCategoryProduct').children().length) {
+        if (!$("#hideForCategoryProduct").children().length) {
             loadAllProductsBy(activeFilter);
         }
     });

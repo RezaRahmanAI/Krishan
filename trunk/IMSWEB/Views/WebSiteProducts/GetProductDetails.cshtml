@@ -4,44 +4,19 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-@using System
 @using System.Collections.Generic
 @using System.Linq
 @{
-    var placeholderImage = Url.Content("~/Content/images/product-placeholder.svg");
-    Func<string, string> resolveAsset = path =>
-    {
-        if (string.IsNullOrWhiteSpace(path))
-        {
-            return placeholderImage;
-        }
-
-        if (path.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-        {
-            return path;
-        }
-
-        if (path.StartsWith("~/", StringComparison.OrdinalIgnoreCase))
-        {
-            return Url.Content(path);
-        }
-
-        if (path.StartsWith("/", StringComparison.OrdinalIgnoreCase))
-        {
-            return Url.Content("~" + path);
-        }
-
-        return Url.Content("~/" + path.TrimStart('/'));
-    };
-
     var galleryImages = (Model.DocInfos ?? new List<VMDocInfo>())
-        .Select(d => resolveAsset(d.DocPath))
-        .Where(path => !string.IsNullOrWhiteSpace(path) && !string.Equals(path, placeholderImage, StringComparison.OrdinalIgnoreCase))
+        .Select(d => d.DocPath)
+        .Where(path => !string.IsNullOrWhiteSpace(path))
         .ToList();
 
-    var primaryImage = resolveAsset(Model.DocumentPath);
+    var primaryImage = !string.IsNullOrWhiteSpace(Model.DocumentPath)
+        ? Model.DocumentPath
+        : galleryImages.FirstOrDefault() ?? string.Empty;
 
-    if (!string.Equals(primaryImage, placeholderImage, StringComparison.OrdinalIgnoreCase))
+    if (!string.IsNullOrWhiteSpace(primaryImage))
     {
         galleryImages.Insert(0, primaryImage);
     }
@@ -52,34 +27,10 @@
         .Take(6)
         .ToList();
 
-    if (!galleryImages.Any())
+    if (!galleryImages.Any() && !string.IsNullOrWhiteSpace(Model.DocumentPath))
     {
-        galleryImages.Add(placeholderImage);
+        galleryImages.Add(Model.DocumentPath);
     }
-
-    var descriptionPoints = (Model.Description ?? string.Empty)
-        .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)
-        .Select(t => t.Trim(' ', '-', '*', '\r'))
-        .Where(t => !string.IsNullOrWhiteSpace(t))
-        .ToList();
-
-    var specificationEntries = new List<Tuple<string, string>>
-    {
-        Tuple.Create("Category", Model.CategoryDisplay),
-        Tuple.Create("Concern", Model.ConcernDisplay),
-        Tuple.Create("Product code", string.IsNullOrWhiteSpace(Model.Id) || string.Equals(Model.Id, "0", StringComparison.OrdinalIgnoreCase) ? "N/A" : Model.Id),
-        Tuple.Create("Published", Model.CreateDate == DateTime.MinValue ? "N/A" : Model.CreateDate.ToString("dd MMM yyyy")),
-        Tuple.Create("Price", Model.Price > 0 ? $"৳ {Model.Price.ToString("N0")}" : "On request")
-    };
-
-    var resourceDocs = (Model.DocInfos ?? new List<VMDocInfo>())
-        .Where(d => !string.IsNullOrWhiteSpace(d.DocPath))
-        .Select(d => new
-        {
-            d.DocName,
-            Path = resolveAsset(d.DocPath)
-        })
-        .ToList();
 }
 
 <section class="product-hero py-5">
@@ -116,64 +67,35 @@
             <div class="col-12 col-lg-6">
                 <div class="product-summary">
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-                        <span class="product-chip"><i class="fa-solid fa-tags me-2"></i>@Model.CategoryDisplay</span>
-                        <span class="product-meta"><i class="fa-regular fa-clock me-2"></i>@(Model.CreateDate == DateTime.MinValue ? "Just added" : Model.CreateDate.ToString("dd MMM yyyy"))</span>
+                        <span class="product-chip"><i class="fa-solid fa-tags me-2"></i>@Model.ProcutCategory</span>
+                        <span class="product-meta"><i class="fa-regular fa-clock me-2"></i>@Model.CreateDate.ToString("dd MMM yyyy")</span>
                     </div>
 
                     <h1 class="product-title mt-4">@Model.Title</h1>
-                    <p class="product-price display-6 fw-bold mb-3">@(Model.Price > 0 ? "৳ " + Model.Price.ToString("N0") : "On request")</p>
+                    <p class="product-price display-6 fw-bold mb-4">৳ @Model.Price.ToString("N0")</p>
 
-                    @if (!string.IsNullOrWhiteSpace(Model.Description))
-                    {
-                        <p class="product-description mb-4">@Model.Description</p>
-                    }
+                    <p class="product-description mb-4">@Model.Description</p>
 
                     <div class="info-grid mt-4">
-                        @foreach (var spec in specificationEntries)
-                        {
-                            <div class="info-tile">
-                                <span class="info-label">@spec.Item1</span>
-                                <span class="info-value">@spec.Item2</span>
-                            </div>
-                        }
-                    </div>
-
-                    @if (descriptionPoints.Any())
-                    {
-                        <div class="product-details-panel mt-4">
-                            <h2 class="panel-title">Key highlights</h2>
-                            <ul class="bullet-list">
-                                @foreach (var point in descriptionPoints)
-                                {
-                                    <li>@point</li>
-                                }
-                            </ul>
+                        <div class="info-tile">
+                            <span class="info-label">Product ID</span>
+                            <span class="info-value">@Model.Id</span>
                         </div>
-                    }
+                        <div class="info-tile">
+                            <span class="info-label">Concern</span>
+                            <span class="info-value">@(!string.IsNullOrWhiteSpace(Model.ConcernID) ? Model.ConcernID : "N/A")</span>
+                        </div>
+                        <div class="info-tile">
+                            <span class="info-label">Listed</span>
+                            <span class="info-value">@Model.CreateDate.ToString("MMM yyyy")</span>
+                        </div>
+                    </div>
 
                     <div class="highlight-chips mt-4 d-flex flex-wrap gap-2">
-                        <span class="highlight-chip"><i class="fa-solid fa-layer-group me-2"></i>@galleryImages.Count media asset@(galleryImages.Count > 1 ? "s" : string.Empty)</span>
-                        <span class="highlight-chip"><i class="fa-solid fa-building me-2"></i>@Model.ConcernDisplay</span>
-                        <span class="highlight-chip"><i class="fa-regular fa-calendar me-2"></i>@(Model.CreateDate == DateTime.MinValue ? "Freshly listed" : Model.CreateDate.ToString("MMM yyyy") + " release")</span>
+                        <span class="highlight-chip"><i class="fa-solid fa-layer-group me-2"></i>@(galleryImages.Count) media assets</span>
+                        <span class="highlight-chip"><i class="fa-solid fa-tag me-2"></i>@Model.ProcutCategory</span>
+                        <span class="highlight-chip"><i class="fa-regular fa-calendar me-2"></i>@Model.CreateDate.ToString("MMM yyyy") release</span>
                     </div>
-
-                    @if (resourceDocs.Any())
-                    {
-                        <div class="product-details-panel mt-4">
-                            <h2 class="panel-title">Downloads & resources</h2>
-                            <ul class="resource-list">
-                                @foreach (var doc in resourceDocs)
-                                {
-                                    var docName = string.IsNullOrWhiteSpace(doc.DocName) ? "Download file" : doc.DocName;
-                                    <li>
-                                        <a href="@doc.Path" target="_blank" rel="noopener">
-                                            <i class="fa-solid fa-file-arrow-down me-2"></i>@docName
-                                        </a>
-                                    </li>
-                                }
-                            </ul>
-                        </div>
-                    }
 
                     <div class="cta-group d-flex flex-wrap gap-3 mt-5">
                         <a href="@Url.Action("AllActiveProduct", "WebSiteProducts")" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold shadow-sm">
@@ -323,14 +245,14 @@
 
     .info-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 1.2rem;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
     }
 
     .info-tile {
         background: #f8fafc;
-        border-radius: 20px;
-        padding: 1rem 1.35rem;
+        border-radius: 18px;
+        padding: 1rem 1.25rem;
         box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.15);
         display: flex;
         flex-direction: column;
@@ -351,32 +273,6 @@
         word-break: break-word;
     }
 
-    .product-details-panel {
-        background: rgba(248, 250, 252, 0.85);
-        border-radius: 22px;
-        padding: 1.5rem 1.75rem;
-        box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.18);
-    }
-
-    .panel-title {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #0f172a;
-        margin-bottom: 1rem;
-    }
-
-    .bullet-list {
-        margin: 0;
-        padding-left: 1.2rem;
-        display: grid;
-        gap: 0.5rem;
-    }
-
-    .bullet-list li {
-        color: #334155;
-        line-height: 1.6;
-    }
-
     .highlight-chip {
         display: inline-flex;
         align-items: center;
@@ -387,32 +283,6 @@
         color: #0369a1;
         font-weight: 600;
         font-size: 0.9rem;
-    }
-
-    .resource-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: grid;
-        gap: 0.75rem;
-    }
-
-    .resource-list a {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: #0f172a;
-        font-weight: 600;
-        text-decoration: none;
-        padding: 0.6rem 1rem;
-        border-radius: 14px;
-        background: rgba(14, 165, 233, 0.1);
-        transition: background 0.2s ease, transform 0.2s ease;
-    }
-
-    .resource-list a:hover {
-        background: rgba(14, 165, 233, 0.2);
-        transform: translateY(-2px);
     }
 
     .cta-group .btn-primary {
