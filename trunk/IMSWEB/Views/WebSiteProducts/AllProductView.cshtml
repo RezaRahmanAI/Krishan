@@ -242,7 +242,6 @@
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script>
     function setActiveFilter(element) {
         if (!element) return;
@@ -310,4 +309,11 @@
             }
         });
     }
+
+    $(document).ready(function () {
+        var activeFilter = document.querySelector('.filter-pill.active');
+        if (!$("#hideForCategoryProduct").children().length) {
+            loadAllProductsBy(activeFilter);
+        }
+    });
 </script>
