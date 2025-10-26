@@ -1,0 +1,120 @@
+﻿
+@using IMSWEB.Model
+@model IMSWEB.CreateCustomerViewModel
+
+@*@model IEnumerable<GetEmployeeViewModel>*@
+
+
+@{
+    ViewBag.Title = "SR Wise Sales & Collection Report";
+}
+
+<h4 class="inline-header">@(ViewBag.Title + ".")</h4>
+<hr />
+<div class="row">
+    <div class="col-md-5">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                @using (Ajax.BeginForm("SRWiseSaleCollectionReport", "Report", new { ReturnUrl = ViewBag.ReturnUrl }, ajaxOptions: new AjaxOptions { HttpMethod = "Post", UpdateTargetId = "report", LoadingElementId = "spinningIcon" }, htmlAttributes: new { role = "form" }))
+                {
+                    <div class="row">
+                        @if (!User.IsInRole(EnumUserRoles.MobileUser.ToString()))
+                        {
+                            <div class="form-group">
+                                <div class="col-sm-4 col-md-4">
+                                    SR Name
+                                </div>
+                                <div class="col-sm-7 col-md-7 full-width-picker">
+                                    @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.PickEmployee, id = (Model != null && Model.EmployeeId != null) ? Model.EmployeeId : "0" });}
+                                    @Html.ValidationMessageFor(model => model.EmployeeId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+
+                    <div class="form-group">
+
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group">
+                            <div class="col-sm-4 col-md-4">
+                                @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class='col-sm-7 col-md-7 input-group date' id='FromDate'>
+                                <input type='text' class="input-sm form-control input-sm" name='FromDate' />
+                                <span class="input-group-addon">
+                                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                                </span>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group">
+                            <div class="col-sm-4 col-md-4">
+                                @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class='col-sm-7 col-md-7 input-group date' id='ToDate'>
+                                <input type='text' class="input-sm form-control input-sm" name='ToDate' />
+                                <span class="input-group-addon">
+                                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    @*<div class="row">
+                            <div class="form-group">
+                                <div class="col-sm-4 col-md-4">
+
+                                </div>
+                                <div class='col-sm-7 col-md-7 input-group' id='allMO'>
+                                    <input id="rdioDetail" title="MO" type="checkbox" value="1" name="ReportType" />All SR
+                                </div>
+                            </div>
+                        </div>*@
+
+                    <div class="row">
+                        <div class="form-group">
+                            <div class="col-sm-3 col-md-3">
+                                <img id="spinningIcon" height="45" width="45" style="display: none;" class="pull-right" src="~/Content/images/Spinner.gif" />
+                            </div>
+                            <div class="col-sm-4 col-md-4">
+                                <input id="btnPreview" type="submit" value="Preview" style="margin-left: 21px" class="btn btn-sm btn-info" />
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+        $('#FromDate').datetimepicker({
+            defaultDate: moment(),
+            format: 'DD-MMM-YYYY'
+        });
+
+        $('#ToDate').datetimepicker({
+            defaultDate: moment(),
+            format: 'DD-MMM-YYYY'
+        });
+        $('form').submit(function () {
+
+            // Get the Login Name value and trim it
+            var name = $.trim($('#EmployeesId').val());
+            var chk = $('#rdioDetail').prop("checked");
+            // Check if empty of not
+           var IsMobileUser="@User.IsInRole(EnumUserRoles.MobileUser.ToString())";
+
+            if (name === '' && !chk && IsMobileUser != "True") {
+                alert('No Employee Selected .');
+                return false;
+            }
+        });
+</script>

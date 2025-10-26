@@ -1,0 +1,2082 @@
+﻿﻿
+<style>
+    .col-md-4 {
+        padding-right: 0px !important;
+    }
+
+    .col-md-8 {
+        padding-left: 0px !important;
+    }
+
+    .fix-width-picker {
+        padding-left: 17px !important;
+    }
+</style>
+@using IMSWEB.Model
+@model SalesOrderViewModel
+
+@{
+    string actionName = ViewContext.RouteData.Values["action"].ToString();
+    ViewBag.Title = actionName + " Advance Sales Order";
+}
+<h4 class="inline-header">@(ViewBag.Title + ".")</h4>
+<hr />
+
+
+@if (User.IsInRole(ConstantData.ADMIN) || User.IsInRole(ConstantData.LOCAL_ADMIN))
+{
+    using (Html.BeginForm(actionName, "AdvanceSalesOrder", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.SODetail.SizeName);
+        @Html.HiddenFor(m => m.SODetail.CategoryName);
+        @Html.HiddenFor(m => m.SODetail.IMENo);
+        <div class="row">
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SalesOrder.InvoiceNo, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SalesOrder.InvoiceNo, new { htmlAttributes = new { @class = "input-sm form-control input-sm", @readonly = "readonly" } })
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.InvoiceNo, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SalesOrder.OrderDate, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        <div class='input-group date' id='OrderDate'>
+                                            @if (User.IsInRole("Mobile User"))
+                                            {
+                                                <input type='text' class="input-sm form-control input-sm" name='OrderDate' readonly />
+                                            }
+                                            else
+                                            {
+                                                <input type='text' class="input-sm form-control input-sm" name='OrderDate' />
+                                            }
+                                            <span class="input-group-addon">
+                                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                                            </span>
+                                        </div>
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.OrderDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-10">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SalesOrder.CustomerId, new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10 full-width-picker fix-width-picker">
+                                        @Html.DropDownListFor(model => model.SalesOrder.CustomerId, new SelectList(ViewBag.CustomerIds, "Id", "Name"), "--Select Customer--", new { @class = "form-control input-sm ddl2", @id = "txtCustomerId" })
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.CustomerId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <div class="col-md-10">
+                                        <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#NewCustomerModal">
+                                            <i class="fa fa-user-circle-o" aria-hidden="true"></i>&nbsp; Add
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2" style="display:none">
+                                <div class="form-group">
+                                    <div class="col-md-10">
+                                        @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.ExceptCreditCustomer, id = (Model != null && Model.SalesOrder.CustomerId != null) ? Model.SalesOrder.CustomerId : "0" });}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            @*<div class="col-lg-6 col-xl-6 col-md-6 col-sm-12 col-xs-12">
+                                <div class="form-group">
+                                    <div class="col-lg-8 col-md-8  col-sm-12  col-xs-12 col-lg-offset-4 col-md-offset-4">
+                                        <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#NewCustomerModal">
+                                            <i class="fa fa-user-circle-o" aria-hidden="true"></i>&nbsp; Add Customer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>*@
+                            <div class="col-lg-6 col-xl-6 col-md-6 col-sm-12 col-xs-12">
+                                
+                            </div>
+                        </div>
+                        @if (ViewBag.IsEmployeeWiseTransEnable && (User.IsInRole(EnumUserRoles.Admin.ToString())
+                            || User.IsInRole(EnumUserRoles.superadmin.ToString())
+                            || User.IsInRole(EnumUserRoles.LocalAdmin.ToString())
+                            || User.IsInRole(EnumUserRoles.Manager.ToString())
+                            || User.IsInRole(EnumUserRoles.RetailManager.ToString()))
+)
+                        {
+                            <div class="row">
+
+                                <div class="col-md-10">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.SalesOrder.EmployeeID, new { @class = "control-label col-md-2" })
+                                        <div class="col-md-10 full-width-picker fix-width-picker">
+                                            @Html.DropDownListFor(model => model.SalesOrder.EmployeeID, new SelectList(ViewBag.EmployeeIds, "Id", "Name"), "--Select Employee--", new { @class = "form-control input-sm ddl2", @id = "txtEmployeeId" })
+                                            @Html.ValidationMessageFor(m => m.SalesOrder.EmployeeID, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <div class="col-md-10">
+                                            @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Employee, id = (Model != null && Model.SalesOrder.EmployeeID != null) ? Model.SalesOrder.EmployeeID : "0" });}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @*<div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            @Html.LabelFor(m => m.SalesOrder.EmployeeID, new { @class = "control-label col-md-2 full-width-picker-label" })
+                                            <div class="col-md-10 full-width-picker">
+                                                @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Employee, id = (Model != null && !string.IsNullOrEmpty(Model.SalesOrder.EmployeeID)) ? Model.SalesOrder.EmployeeID : "0" });}
+                                                @Html.ValidationMessageFor(m => m.SalesOrder.EmployeeID, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>*@
+                        }
+                        @*<div class="row">
+
+                                <div class="col-md-10">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.SalesOrder.DepotId, new { @class = "control-label col-md-2" })
+                                        <div class="col-md-10 full-width-picker fix-width-picker">
+                                            @Html.DropDownListFor(model => model.SalesOrder.DepotId, new SelectList(ViewBag.DepotIds, "Id", "Name"), "--Select Depot--", new { @class = "form-control input-sm ddl2", @id = "txtDepotId" })
+                                            @Html.ValidationMessageFor(m => m.SalesOrder.DepotId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <div class="col-md-10">
+                                            @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Depot, id = (Model != null && Model.SalesOrder.DepotId != null) ? Model.SalesOrder.DepotId : "0" });}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>*@
+                        @*<div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.SalesOrder.DepotId, new { @class = "control-label col-md-2 full-width-picker-label" })
+                                        <div class="col-md-10 full-width-picker">
+                                            @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Depot, id = (Model != null && Model.SalesOrder.DepotId != null) ? Model.SalesOrder.DepotId : "0" });}
+                                            @Html.ValidationMessageFor(m => m.SalesOrder.DepotId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>*@
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+                            @*<div class="col-md-12">
+                                    <div class="form-group">
+                                        <b><span id="SalesOrder_OfferDescription" class="tag">@Model.SalesOrder.OfferDescription</span></b>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.Hidden("externalIMENo")
+
+                                        <span style="display:none" class="text-danger" id="externalIMENoErrorID">IMEI not avaiable in stock.</span>
+                                    </div>
+                                </div>*@
+
+                            @*<div class="col-md-12">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.SODetail.ProductId, new { @class = "control-label col-md-2 full-width-picker-label" })
+                                        <div class="col-md-10 full-width-picker">
+                                            <span id="pickerSpace">
+                                                @if (User.IsInRole("Mobile User"))
+                                                {
+                                                    //Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.ProductDetail, id = (Model != null && Model.SODetail.ProductId != null) ? Model.SODetail.ProductId : "0" });
+                                                    Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.SRProductDetail, id = (Model != null && Model.SODetail.ProductId != null) ? Model.SODetail.ProductId : "0" });
+                                                }
+                                                else
+                                                {
+                                                    Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.ProductDetail, id = (Model != null && Model.SODetail.ProductId != null) ? Model.SODetail.ProductId : "0" });
+                                                }
+                                            </span>
+                                            @Html.ValidationMessageFor(m => m.SODetail.ProductId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>*@
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SODetail.ProductId, new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10" style="padding-left: 37px !important; padding-right: 15px !important;">
+                                        @Html.DropDownListFor(model => model.SODetail.ProductId, new SelectList(ViewBag.ProductIds, "Id", "Name"), "--Select Agent--", new { @class = "form-control input-sm ddl2", @id = "txtProductId" })
+                                        @Html.ValidationMessageFor(m => m.SODetail.ProductId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2" style="display: none;">
+                                <div class="form-group">
+                                    <div class="col-md-10">
+                                        <span id="pickerSpace">
+                                            @if (User.IsInRole("Mobile User"))
+                                            {
+                                                //Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.ProductDetail, id = (Model != null && Model.SODetail.ProductId != null) ? Model.SODetail.ProductId : "0" });
+                                                Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.ProductDetail, id = (Model != null && Model.SODetail.ProductId != null) ? Model.SODetail.ProductId : "0" });
+                                            }
+                                            else
+                                            {
+                                                Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.ProductDetail, id = (Model != null && Model.SODetail.ProductId != null) ? Model.SODetail.ProductId : "0" });
+                                            }
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SODetail.ParentQuantity, new { @class = "control-label col-md-5", id = "lblParentUnit" })
+                                    <div class="col-md-7">
+                                        @Html.EditorFor(m => m.SODetail.ParentQuantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", tabindex = 1 } })
+                                        @Html.ValidationMessageFor(m => m.SODetail.ParentQuantity, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SODetail.RatePerArea, new { @class = "control-label col-md-5", id = "lblRatePerArea" })
+                                    <div class="col-md-7">
+                                        @if (User.IsInRole(EnumUserRoles.MobileUser.ToString()))
+                                        {
+                                            @Html.EditorFor(m => m.SODetail.RatePerArea, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 2, @readonly = "readonly" } })
+                                        }
+                                        else
+                                        {
+                                            @Html.EditorFor(m => m.SODetail.RatePerArea, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 2 } })
+                                        }
+                                        @Html.ValidationMessageFor(m => m.SODetail.RatePerArea, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                @*<div class="divHiddenUnitPrice" style="display:none">
+                                        @Html.HiddenFor(m => m.SODetail.UnitPrice, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                    </div>*@
+                                @*<div class="form-group">
+                                        @Html.LabelFor(m => m.SODetail.PPOffer, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.SODetail.PPOffer, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                            @Html.ValidationMessageFor(m => m.SODetail.PPOffer, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>*@
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SODetail.PPDPercentage, new { @class = "control-label col-md-5" })
+                                    <div class="col-md-7">
+                                        @if (User.IsInRole(EnumUserRoles.MobileUser.ToString()))
+                                        {
+                                            @Html.EditorFor(m => m.SODetail.PPDPercentage, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                        }
+                                        else
+                                        {
+                                            @Html.EditorFor(m => m.SODetail.PPDPercentage, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                        }
+                                        @Html.ValidationMessageFor(m => m.SODetail.PPDPercentage, "", new { @class = "text-danger" })
+                                        @Html.HiddenFor(m => m.SODetail.PPOffer, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SODetail.PPDAmount, new { @class = "control-label col-md-5" })
+                                    <div class="col-md-7">
+                                        @if (User.IsInRole(EnumUserRoles.MobileUser.ToString()))
+                                        {
+                                            @Html.EditorFor(m => m.SODetail.PPDAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                        }
+                                        else
+                                        {
+                                            @Html.EditorFor(m => m.SODetail.PPDAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                        }
+                                        @Html.ValidationMessageFor(m => m.SODetail.PPDAmount, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group" style="display:none" id="AreaPerCartondiv">
+                                    @Html.LabelFor(m => m.SODetail.AreaPerCarton, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SODetail.AreaPerCarton, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 7, @readonly = "readonly" } })
+                                        @Html.ValidationMessageFor(m => m.SODetail.AreaPerCarton, "", new { @class = "text-danger" })
+                                        @Html.HiddenFor(m => m.SODetail.FractionQty)
+                                        @Html.HiddenFor(m => m.SODetail.FractionAmt)
+                                    </div>
+                                </div>
+
+                                @*<div class="form-group">
+                                        @Html.LabelFor(m => m.SODetail.FractionQty, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.SODetail.FractionQty, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 7, @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.SODetail.FractionQty, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.SODetail.FractionAmt, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.SODetail.FractionAmt, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 7, @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.SODetail.FractionAmt, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>*@
+
+                            </div>
+
+                            <div class="col-md-6">
+
+
+                                <div class="form-group" style="display:none" id="TotalAreadiv">
+                                    @Html.LabelFor(m => m.SODetail.TotalArea, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SODetail.TotalArea, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                        @Html.ValidationMessageFor(m => m.SODetail.TotalArea, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group" style="display:none">
+                                    @Html.LabelFor(m => m.SODetail.ConvertValue, new { @class = "control-label col-md-4", id = "lblConvertValue" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SODetail.ConvertValue, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", tabindex = 1, @readonly = "readonly" } })
+                                        @Html.ValidationMessageFor(m => m.SODetail.ConvertValue, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group" id="divChildQuantity">
+                                    @Html.LabelFor(m => m.SODetail.ChildQuantity, new { @class = "control-label col-md-5", id = "lblChildUnit" })
+                                    <div class="col-md-7">
+                                        @Html.EditorFor(m => m.SODetail.ChildQuantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", tabindex = 1 } })
+                                        @Html.ValidationMessageFor(m => m.SODetail.ChildQuantity, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group" style="display:none">
+                                    @Html.LabelFor(m => m.SODetail.UnitPrice, new { @class = "control-label col-md-4", @id = "lblMRP" })
+                                    <div class="col-md-8">
+                                        @if (User.IsInRole(EnumUserRoles.MobileUser.ToString()))
+                                        {
+                                            @Html.EditorFor(m => m.SODetail.UnitPrice, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                        }
+                                        else
+                                        {
+                                            @Html.EditorFor(m => m.SODetail.UnitPrice, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                        }
+                                        @Html.ValidationMessageFor(m => m.SODetail.UnitPrice, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SODetail.Quantity, new { @class = "control-label col-md-5" })
+                                    <div class="col-md-7">
+                                        @Html.EditorFor(m => m.SODetail.Quantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", @readonly = "readonly" } })
+                                        @Html.ValidationMessageFor(m => m.SODetail.Quantity, "", new { @class = "text-danger" })
+                                        @Html.HiddenFor(m => m.SODetail.MRPRate, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SODetail.UTAmount, new { @class = "control-label col-md-5" })
+                                    <div class="col-md-7">
+                                        @Html.EditorFor(m => m.SODetail.UTAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                        @Html.ValidationMessageFor(m => m.SODetail.UTAmount, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                @*<div class="form-group">
+                                        @Html.LabelFor(m => m.SODetail.BonusQuantity, new { @class = "control-label col-md-4", id = "lblBonusQuantity" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.SODetail.BonusQuantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number" } })
+                                            @Html.ValidationMessageFor(m => m.SODetail.BonusQuantity, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>*@
+
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="pull-right">
+                            <input type="submit" class="btn btn-sm btn-primary" name="addButton" value="Add to order" />
+                            <button type="button" class="btn btn-sm btn-danger">Clear</button>
+                        </div>
+                    </div>
+                </div>
+                @*<div class="panel panel-default">
+                        <div class="panel-heading">Warrenty</div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.SODetail.CompressorWarrentyMonth, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.SODetail.CompressorWarrentyMonth, new { htmlAttributes = new { @class = "input-sm form-control", @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.SODetail.CompressorWarrentyMonth, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.SODetail.PanelWarrentyMonth, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.SODetail.PanelWarrentyMonth, new { htmlAttributes = new { @class = "input-sm form-control", @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.SODetail.PanelWarrentyMonth, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.SODetail.ServiceWarrentyMonth, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.SODetail.ServiceWarrentyMonth, new { htmlAttributes = new { @class = "input-sm form-control", @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.SODetail.ServiceWarrentyMonth, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.SODetail.MotorWarrentyMonth, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.SODetail.MotorWarrentyMonth, new { htmlAttributes = new { @class = "input-sm form-control", @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.SODetail.MotorWarrentyMonth, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.SODetail.SparePartsWarrentyMonth, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.SODetail.SparePartsWarrentyMonth, new { htmlAttributes = new { @class = "input-sm form-control", @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.SODetail.SparePartsWarrentyMonth, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>*@
+            </div>
+
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+
+                            <div class="col-md-6">
+
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SalesOrder.CurrentDue, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SalesOrder.CurrentDue, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.CurrentDue, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group" style="display: none;">
+                                    @Html.LabelFor(m => m.SalesOrder.RemindDate, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        <div class='input-group date' id='RemindDate'>
+                                            <input type='text' class="input-sm form-control input-sm" name='RemindDate' />
+                                            <span class="input-group-addon">
+                                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                                            </span>
+                                        </div>
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.RemindDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SalesOrder.TotalOffer, new { @class = "control-label col-md-4" })
+                                    @*@Html.LabelFor(m => m.SalesOrder.GrandTotal, new { @class = "control-label col-md-4" })*@
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SalesOrder.TotalOffer, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                        @Html.HiddenFor(m => m.SalesOrder.GrandTotal)
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.GrandTotal, "", new { @class = "text-danger" })
+                                        @*@Html.EditorFor(m => m.SalesOrder.GrandTotal, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })*@
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.GrandTotal, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @*@Html.LabelFor(m => m.SalesOrder.PPDiscountAmount, new { @class = "control-label col-md-4" })*@
+                                    <div class="col-md-8">
+                                        @Html.HiddenFor(m => m.SalesOrder.PPDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                        @Html.HiddenFor(m => m.SalesOrder.TempFlatDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.PPDiscountAmount, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <table id="productTable"
+                               data-toggle="table"
+                               data-height="278"
+                               class="table table-responsive table-bordered table-striped text-nowrap" cellspacing="0" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Sl
+                                    </th>
+                                    <th data-field="code"
+                                        data-sortable="true">
+                                        Code
+                                    </th>
+                                    <th data-field="productName"
+                                        data-sorter="sorter"
+                                        data-sortable="true">
+                                        @Html.DisplayNameFor(model => model.SODetail.ProductName)
+                                    </th>
+                                    <th data-field="qauntity"
+                                        data-sortable="true">
+                                        @Html.DisplayNameFor(model => model.SODetail.Quantity)
+                                    </th>
+                                    <th data-field="unitPrice"
+                                        data-sortable="true">
+                                        Rate/Unit
+                                    </th>
+                                    <th data-field="discountPercent"
+                                        data-sortable="true">
+                                        Dis (%)
+                                    </th>
+                                    <th data-field="discountAmount"
+                                        data-sortable="true">
+                                        Dis.Amt
+                                    </th>
+
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.SODetail.UTAmount)
+                                    </th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+
+                                    int count = 1;
+
+                                    decimal MRP = 0;
+                                    decimal Qty = 0;
+                                    decimal DisAmt = 0;
+                                    decimal UnitPrice = 0;
+
+                                    foreach (var item in Model.SODetails)
+                                    {
+
+
+                                        MRP = Convert.ToDecimal(@item.MRPRate) * Convert.ToDecimal(@item.ConvertValue);
+                                        Qty = Convert.ToDecimal(@item.Quantity) / Convert.ToDecimal(@item.ConvertValue);
+                                        //  DisAmt = Convert.ToDecimal(@item.PPDAmount) * Convert.ToDecimal(@item.ConvertValue);
+                                        UnitPrice = Convert.ToDecimal(@item.UnitPrice) * Convert.ToDecimal(@item.ConvertValue);
+
+                                        if (item.Status == EnumStatus.Updated || item.Status == EnumStatus.Deleted) { continue; }
+                                        <tr>
+                                            <td>
+                                                @count
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.ProductCode)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.ProductName)
+                                            </td>
+                                            <td>
+                                                @Qty
+                                            </td>
+                                            <td>
+                                                @UnitPrice
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.PPDPercentage)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.PPDAmount)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.UTAmount)
+                                            </td>
+                                            @*<td>
+                                                @Html.ActionLink("Edit", "EditFromView", new { id = item.ProductId, detailId = item.StockDetailId, previousAction = actionName.ToLower() }, new { @class = "btn btn-xs btn-info" })
+                                            </td>*@
+                                            <td>
+                                                @Html.ActionLink("Delete", "DeleteFromView", new { id = item.ProductId, detailId = item.StockDetailId, previousAction = actionName.ToLower() }, new { onclick = "if(!confirm('Do you want to delete this order?')) return false;" })
+                                            </td>
+                                        </tr>
+                                        count++;
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.TotalDiscountPercentage, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.TotalDiscountPercentage, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.TotalDiscountPercentage, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.NetDiscount, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.NetDiscount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.NetDiscount, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            @*<div class="form-group">
+                                    @Html.LabelFor(m => m.SalesOrder.VATPercentage, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SalesOrder.VATPercentage, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.VATPercentage, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>*@
+
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.TotalDiscountAmount, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.TotalDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.TotalDiscountAmount, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.Remarks, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.Remarks, new { htmlAttributes = new { @class = "input-sm form-control input-sm", type = "text", } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.Remarks, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            @*<div class="form-group">
+                                    @Html.LabelFor(m => m.SalesOrder.AdjAmount, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SalesOrder.AdjAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.AdjAmount, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>*@
+
+                            @*<div class="form-group">
+                                    @Html.LabelFor(m => m.SalesOrder.VATAmount, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SalesOrder.VATAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.VATAmount, "", new { @class = "text-danger" })
+                                        @Html.HiddenFor(m => m.SalesOrder.TotalFractionAmt)
+                                    </div>
+                                </div>*@
+                            @*<div class="form-group">
+                                    @Html.LabelFor(m => m.SalesOrder.TermsType, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.EnumDropDownListFor(m => m.SalesOrder.TermsType, "--Select Type--", new { @class = "form-control input-sm" })
+                                    </div>
+                                </div>*@
+                            @*<div class="form-group">
+                                    @Html.LabelFor(m => m.SalesOrder.TotalFractionAmt, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SalesOrder.TotalFractionAmt, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.TotalFractionAmt, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>*@
+
+                        </div>
+                        <div class="col-md-4" style="padding-right: 5px !important;">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.TotalAmount, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.TotalAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.TotalAmount, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            @*<div class="form-group">
+                                    @Html.LabelFor(m => m.SalesOrder.RecieveAmount, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SalesOrder.RecieveAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.RecieveAmount, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>*@
+
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.PaymentDue, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.PaymentDue, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.PaymentDue, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            @*<div class="form-group">
+                                <div class="col-md-4">
+
+                                </div>*@
+                            @*<div class="col-md-4">
+                                    @Html.EditorFor(m => m.SalesOrder.IsSmsEnable, new { htmlAttributes = new { @class = "form-check-input" } })
+                                    @Html.LabelFor(m => m.SalesOrder.IsSmsEnable, htmlAttributes: new { @class = "form-check-label" })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.IsSmsEnable, "", new { @class = "text-danger" })
+                                </div>*@
+
+                            <div class="form-group">
+                                <div class="col-md-offset-4 col-md-8">
+                                    <input type="submit" class="btn btn-sm btn-primary pull-right" name="submitButton" value="Save order" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+
+    <div id="NewCustomerModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h5 class="modal-title">Create New Retail Customer</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 col-md-3 col-lg-3" for="txtNewCustomerName">Name:</label>
+                            <div class=" col-sm-9 col-md-9 col-lg-9">
+                                <input type="text" class="form-control input-sm" id="txtNewCustomerName" placeholder="Enter Name" name="txtNewCustomerName">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 col-md-3 col-lg-3" for="txtNewCustomerContact">Contact No.:</label>
+                            <div class="col-sm-9 col-md-9 col-lg-9">
+                                <input type="text" class="form-control input-sm" id="txtNewCustomerContact" placeholder="Enter Contact Number" name="txtNewCustomerContact">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 col-md-3 col-lg-3" for="txtNewCustomerAddress">Address:</label>
+                            <div class="col-sm-9 col-md-9 col-lg-9">
+                                <input type="text" class="form-control input-sm" id="txtNewCustomerAddress" placeholder="Enter Address" name="txtNewCustomerAddress">
+                                <input type="hidden" value="0.00" class="form-control input-sm" id="txtNewCustomerOpeningDue" placeholder="Enter Opening Due" name="txtNewCustomerOpeningDue">
+                            </div>
+                        </div>
+                        @*<div class="form-group">
+                                <label class="control-label col-sm-3 col-md-3 col-lg-3" for="txtNewCustomerOpeningDue">Opening Due:</label>
+                                <div class=" col-sm-9 col-md-9 col-lg-9">
+                                    <input type="number" class="form-control input-sm" id="txtNewCustomerOpeningDue" placeholder="Enter Opening Due" name="txtNewCustomerOpeningDue">
+                                </div>
+                            </div>*@
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+                    <button type="button" id="btnSaveNewCustomer" class="btn btn-primary btn-sm">Save</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+
+
+
+@*mobile user Menu Start Here*@
+
+@if (User.IsInRole(ConstantData.ROLE_MOBILE_USER))
+{
+    using (Html.BeginForm(actionName, "AdvanceSalesOrder", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.SODetail.SizeName);
+        @Html.HiddenFor(m => m.SODetail.CategoryName);
+        @Html.HiddenFor(m => m.SODetail.IMENo);
+        <div class="row">
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SalesOrder.InvoiceNo, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SalesOrder.InvoiceNo, new { htmlAttributes = new { @class = "input-sm form-control input-sm", @readonly = "readonly" } })
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.InvoiceNo, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SalesOrder.OrderDate, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        <div class='input-group date' id='OrderDate'>
+                                            @if (User.IsInRole("Mobile User"))
+                                            {
+                                                <input type='text' class="input-sm form-control input-sm" name='OrderDate' readonly />
+                                            }
+                                            else
+                                            {
+                                                <input type='text' class="input-sm form-control input-sm" name='OrderDate' />
+                                            }
+                                            <span class="input-group-addon">
+                                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                                            </span>
+                                        </div>
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.OrderDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-10">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SalesOrder.CustomerId, new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10 full-width-picker fix-width-picker">
+                                        @Html.DropDownListFor(model => model.SalesOrder.CustomerId, new SelectList(ViewBag.CustomerIds, "Id", "Name"), "--Select Customer--", new { @class = "form-control input-sm ddl2", @id = "txtCustomerId" })
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.CustomerId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <div class="col-md-10" style="display: none;">
+                                        @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.ExceptCreditCustomer, id = (Model != null && Model.SalesOrder.CustomerId != null) ? Model.SalesOrder.CustomerId : "0" });}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" style="display:none;">
+                            <div class="col-lg-6 col-xl-6 col-md-6 col-sm-12 col-xs-12">
+                                <div class="form-group" style="display:none;">
+                                    <div class="col-lg-8 col-md-8  col-sm-12  col-xs-12 col-lg-offset-4 col-md-offset-4">
+                                        <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#NewCustomerModal">
+                                            <i class="fa fa-user-circle-o" aria-hidden="true"></i>&nbsp; Add Customer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-xl-6 col-md-6 col-sm-12 col-xs-12" style="display:none">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SalesOrder.CurrentDue, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SalesOrder.CurrentDue, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.CurrentDue, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @if (ViewBag.IsEmployeeWiseTransEnable && (User.IsInRole(EnumUserRoles.Admin.ToString())
+                            || User.IsInRole(EnumUserRoles.superadmin.ToString())
+                            || User.IsInRole(EnumUserRoles.LocalAdmin.ToString())
+                            || User.IsInRole(EnumUserRoles.Manager.ToString())
+                            || User.IsInRole(EnumUserRoles.RetailManager.ToString()))
+)
+                        {
+                            <div class="row">
+
+                                <div class="col-md-10">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.SalesOrder.EmployeeID, new { @class = "control-label col-md-2" })
+                                        <div class="col-md-10 full-width-picker fix-width-picker">
+                                            @Html.DropDownListFor(model => model.SalesOrder.EmployeeID, new SelectList(ViewBag.EmployeeIds, "Id", "Name"), "--Select Employee--", new { @class = "form-control input-sm ddl2", @id = "txtEmployeeId" })
+                                            @Html.ValidationMessageFor(m => m.SalesOrder.EmployeeID, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group" style="display:none;">
+                                        <div class="col-md-10">
+                                            @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Employee, id = (Model != null && Model.SalesOrder.EmployeeID != null) ? Model.SalesOrder.EmployeeID : "0" });}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @*<div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            @Html.LabelFor(m => m.SalesOrder.EmployeeID, new { @class = "control-label col-md-2 full-width-picker-label" })
+                                            <div class="col-md-10 full-width-picker">
+                                                @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Employee, id = (Model != null && !string.IsNullOrEmpty(Model.SalesOrder.EmployeeID)) ? Model.SalesOrder.EmployeeID : "0" });}
+                                                @Html.ValidationMessageFor(m => m.SalesOrder.EmployeeID, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>*@
+                        }
+                        @*<div class="row">
+
+                                <div class="col-md-10">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.SalesOrder.DepotId, new { @class = "control-label col-md-2" })
+                                        <div class="col-md-10 full-width-picker fix-width-picker">
+                                            @Html.DropDownListFor(model => model.SalesOrder.DepotId, new SelectList(ViewBag.DepotIds, "Id", "Name"), "--Select Depot--", new { @class = "form-control input-sm ddl2", @id = "txtDepotId" })
+                                            @Html.ValidationMessageFor(m => m.SalesOrder.DepotId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <div class="col-md-10">
+                                            @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Depot, id = (Model != null && Model.SalesOrder.DepotId != null) ? Model.SalesOrder.DepotId : "0" });}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>*@
+                        @*<div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.SalesOrder.DepotId, new { @class = "control-label col-md-2 full-width-picker-label" })
+                                        <div class="col-md-10 full-width-picker">
+                                            @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Depot, id = (Model != null && Model.SalesOrder.DepotId != null) ? Model.SalesOrder.DepotId : "0" });}
+                                            @Html.ValidationMessageFor(m => m.SalesOrder.DepotId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>*@
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+                            @*<div class="col-md-12">
+                                    <div class="form-group">
+                                        <b><span id="SalesOrder_OfferDescription" class="tag">@Model.SalesOrder.OfferDescription</span></b>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.Hidden("externalIMENo")
+
+                                        <span style="display:none" class="text-danger" id="externalIMENoErrorID">IMEI not avaiable in stock.</span>
+                                    </div>
+                                </div>*@
+
+                            @*<div class="col-md-12">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.SODetail.ProductId, new { @class = "control-label col-md-2 full-width-picker-label" })
+                                        <div class="col-md-10 full-width-picker">
+                                            <span id="pickerSpace">
+                                                @if (User.IsInRole("Mobile User"))
+                                                {
+                                                    //Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.ProductDetail, id = (Model != null && Model.SODetail.ProductId != null) ? Model.SODetail.ProductId : "0" });
+                                                    Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.SRProductDetail, id = (Model != null && Model.SODetail.ProductId != null) ? Model.SODetail.ProductId : "0" });
+                                                }
+                                                else
+                                                {
+                                                    Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.ProductDetail, id = (Model != null && Model.SODetail.ProductId != null) ? Model.SODetail.ProductId : "0" });
+                                                }
+                                            </span>
+                                            @Html.ValidationMessageFor(m => m.SODetail.ProductId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>*@
+                            <div class="col-md-10">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SODetail.ProductId, new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10 full-width-picker fix-width-picker">
+                                        @Html.DropDownListFor(model => model.SODetail.ProductId, new SelectList(ViewBag.ProductIds, "Id", "Name"), "--Select Agent--", new { @class = "form-control input-sm ddl2", @id = "txtProductId" })
+                                        @Html.ValidationMessageFor(m => m.SODetail.ProductId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <div class="col-md-10" style="display:none;">
+                                        <span id="pickerSpace">
+                                            @if (User.IsInRole("Mobile User"))
+                                            {
+                                                //Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.ProductDetail, id = (Model != null && Model.SODetail.ProductId != null) ? Model.SODetail.ProductId : "0" });
+                                                Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.ProductDetail, id = (Model != null && Model.SODetail.ProductId != null) ? Model.SODetail.ProductId : "0" });
+                                            }
+                                            else
+                                            {
+                                                Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.ProductDetail, id = (Model != null && Model.SODetail.ProductId != null) ? Model.SODetail.ProductId : "0" });
+                                            }
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SODetail.ParentQuantity, new { @class = "control-label col-md-4", id = "lblParentUnit" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SODetail.ParentQuantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", tabindex = 1 } })
+                                        @Html.ValidationMessageFor(m => m.SODetail.ParentQuantity, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group" id="divChildQuantity">
+                                    @Html.LabelFor(m => m.SODetail.ChildQuantity, new { @class = "control-label col-md-4", id = "lblChildUnit" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SODetail.ChildQuantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", tabindex = 1 } })
+                                        @Html.ValidationMessageFor(m => m.SODetail.ChildQuantity, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SODetail.RatePerArea, new { @class = "control-label col-md-4", id = "lblRatePerArea" })
+                                    <div class="col-md-8">
+                                        @if (User.IsInRole(EnumUserRoles.MobileUser.ToString()))
+                                        {
+                                            @Html.EditorFor(m => m.SODetail.RatePerArea, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 2, @readonly = "readonly" } })
+                                        }
+                                        else
+                                        {
+                                            @Html.EditorFor(m => m.SODetail.RatePerArea, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 2 } })
+                                        }
+                                        @Html.ValidationMessageFor(m => m.SODetail.RatePerArea, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                @*<div class="divHiddenUnitPrice" style="display:none">
+                                        @Html.HiddenFor(m => m.SODetail.UnitPrice, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                    </div>*@
+                                @*<div class="form-group">
+                                        @Html.LabelFor(m => m.SODetail.PPOffer, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.SODetail.PPOffer, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                            @Html.ValidationMessageFor(m => m.SODetail.PPOffer, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>*@
+                                @*<div class="form-group" style="display:none">
+                                        @Html.LabelFor(m => m.SODetail.PPDPercentage, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8" style="display:none">
+                                            @if (User.IsInRole(EnumUserRoles.MobileUser.ToString()))
+                                            {
+                                                @Html.EditorFor(m => m.SODetail.PPDPercentage, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                            }
+                                            else
+                                            {
+                                                @Html.EditorFor(m => m.SODetail.PPDPercentage, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                            }
+                                            @Html.ValidationMessageFor(m => m.SODetail.PPDPercentage, "", new { @class = "text-danger" })
+                                            @Html.HiddenFor(m => m.SODetail.PPOffer, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="display:none">
+                                        @Html.LabelFor(m => m.SODetail.PPDAmount, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8" style="display:none">
+                                            @if (User.IsInRole(EnumUserRoles.MobileUser.ToString()))
+                                            {
+                                                @Html.EditorFor(m => m.SODetail.PPDAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                            }
+                                            else
+                                            {
+                                                @Html.EditorFor(m => m.SODetail.PPDAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                            }
+                                            @Html.ValidationMessageFor(m => m.SODetail.PPDAmount, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>*@
+
+                                <div class="form-group" style="display:none" id="AreaPerCartondiv">
+                                    @Html.LabelFor(m => m.SODetail.AreaPerCarton, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SODetail.AreaPerCarton, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 7, @readonly = "readonly" } })
+                                        @Html.ValidationMessageFor(m => m.SODetail.AreaPerCarton, "", new { @class = "text-danger" })
+                                        @Html.HiddenFor(m => m.SODetail.FractionQty)
+                                        @Html.HiddenFor(m => m.SODetail.FractionAmt)
+                                    </div>
+                                </div>
+
+                                @*<div class="form-group">
+                                        @Html.LabelFor(m => m.SODetail.FractionQty, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.SODetail.FractionQty, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 7, @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.SODetail.FractionQty, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.SODetail.FractionAmt, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.SODetail.FractionAmt, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 7, @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.SODetail.FractionAmt, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>*@
+
+                            </div>
+
+                            <div class="col-md-6">
+
+
+                                <div class="form-group" style="display:none" id="TotalAreadiv">
+                                    @Html.LabelFor(m => m.SODetail.TotalArea, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SODetail.TotalArea, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                        @Html.ValidationMessageFor(m => m.SODetail.TotalArea, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group" style="display:none;">
+                                    @Html.LabelFor(m => m.SODetail.ConvertValue, new { @class = "control-label col-md-4", id = "lblConvertValue" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SODetail.ConvertValue, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", tabindex = 1, @readonly = "readonly" } })
+                                        @Html.ValidationMessageFor(m => m.SODetail.ConvertValue, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group" id="divUnitPrice" style="display:none;">
+                                    @Html.LabelFor(m => m.SODetail.UnitPrice, new { @class = "control-label col-md-4", @id = "lblMRP" })
+                                    <div class="col-md-8">
+                                        @if (User.IsInRole(EnumUserRoles.MobileUser.ToString()))
+                                        {
+                                            @Html.EditorFor(m => m.SODetail.UnitPrice, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                        }
+                                        else
+                                        {
+                                            @Html.EditorFor(m => m.SODetail.UnitPrice, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                        }
+                                        @Html.ValidationMessageFor(m => m.SODetail.UnitPrice, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SODetail.Quantity, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SODetail.Quantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", @readonly = "readonly" } })
+                                        @Html.ValidationMessageFor(m => m.SODetail.Quantity, "", new { @class = "text-danger" })
+                                        @Html.HiddenFor(m => m.SODetail.MRPRate, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SODetail.UTAmount, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SODetail.UTAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                        @Html.ValidationMessageFor(m => m.SODetail.UTAmount, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                @*<div class="form-group">
+                                        @Html.LabelFor(m => m.SODetail.BonusQuantity, new { @class = "control-label col-md-4", id = "lblBonusQuantity" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.SODetail.BonusQuantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number" } })
+                                            @Html.ValidationMessageFor(m => m.SODetail.BonusQuantity, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>*@
+
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+
+                            <div class="col-md-6">
+                                <div class="form-group" style="display:none">
+                                    @Html.LabelFor(m => m.SalesOrder.RemindDate, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        <div class='input-group date' id='RemindDate'>
+                                            <input type='text' class="input-sm form-control input-sm" name='RemindDate' />
+                                            <span class="input-group-addon">
+                                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                                            </span>
+                                        </div>
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.RemindDate, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group" style="display:none">
+                                    @Html.LabelFor(m => m.SalesOrder.TotalOffer, new { @class = "control-label col-md-4" })
+                                    @*@Html.LabelFor(m => m.SalesOrder.GrandTotal, new { @class = "control-label col-md-4" })*@
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SalesOrder.TotalOffer, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                        @Html.HiddenFor(m => m.SalesOrder.GrandTotal)
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.GrandTotal, "", new { @class = "text-danger" })
+                                        @*@Html.EditorFor(m => m.SalesOrder.GrandTotal, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })*@
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.GrandTotal, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group" style="display:none">
+                                    @*@Html.LabelFor(m => m.SalesOrder.PPDiscountAmount, new { @class = "control-label col-md-4" })*@
+                                    <div class="col-md-8">
+                                        @Html.HiddenFor(m => m.SalesOrder.PPDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                        @Html.HiddenFor(m => m.SalesOrder.TempFlatDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.PPDiscountAmount, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="pull-Left">
+                            <input type="submit" class="btn btn-sm btn-primary" name="addButton" value="Add to order" />
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <table id="productTable"
+                               data-toggle="table"
+                               data-height="272"
+                               class="table table-responsive table-bordered table-striped text-nowrap" cellspacing="0" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Sl
+                                    </th>
+                                    <th data-field="code"
+                                        data-sortable="true">
+                                        Code
+                                    </th>
+                                    <th data-field="productName"
+                                        data-sorter="sorter"
+                                        data-sortable="true">
+                                        @Html.DisplayNameFor(model => model.SODetail.ProductName)
+                                    </th>
+                                    <th data-field="qauntity"
+                                        data-sortable="true">
+                                        @Html.DisplayNameFor(model => model.SODetail.Quantity)
+                                    </th>
+                                    <th data-field="unitPrice"
+                                        data-sortable="true">
+                                        Rate/Unit
+                                    </th>
+                                    <th data-field="discountPercent"
+                                        data-sortable="true">
+                                        Dis (%)
+                                    </th>
+                                    <th data-field="discountAmount"
+                                        data-sortable="true">
+                                        Dis.Amt
+                                    </th>
+
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.SODetail.UTAmount)
+                                    </th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+
+
+                            <tbody>
+                                @{
+
+                                    int count = 1;
+
+                                    decimal MRP = 0;
+                                    decimal Qty = 0;
+                                    decimal DisAmt = 0;
+                                    decimal UnitPrice = 0;
+
+                                    foreach (var item in Model.SODetails)
+                                    {
+
+
+                                        MRP = Convert.ToDecimal(@item.MRPRate) * Convert.ToDecimal(@item.ConvertValue);
+                                        Qty = Convert.ToDecimal(@item.Quantity) / Convert.ToDecimal(@item.ConvertValue);
+                                        //  DisAmt = Convert.ToDecimal(@item.PPDAmount) * Convert.ToDecimal(@item.ConvertValue);
+                                        UnitPrice = Convert.ToDecimal(@item.UnitPrice) * Convert.ToDecimal(@item.ConvertValue);
+
+                                        if (item.Status == EnumStatus.Updated || item.Status == EnumStatus.Deleted) { continue; }
+                                        <tr>
+                                            <td>
+                                                @count
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.ProductCode)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.ProductName)
+                                            </td>
+                                            <td>
+                                                @Qty
+                                            </td>
+                                            <td>
+                                                @UnitPrice
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.PPDPercentage)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.PPDAmount)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.UTAmount)
+                                            </td>
+                                            <td>
+                                                @Html.ActionLink("Edit", "EditFromView", new { id = item.ProductId, detailId = item.StockDetailId, previousAction = actionName.ToLower() }, new { @class = "btn btn-xs btn-info" })
+                                            </td>
+                                            <td>
+                                                @Html.ActionLink("Delete", "DeleteFromView", new { id = item.ProductId, detailId = item.StockDetailId, previousAction = actionName.ToLower() }, new { onclick = "if(!confirm('Do you want to delete this order?')) return false;" })
+                                            </td>
+                                        </tr>
+                                        count++;
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                @*<div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="pull-Left">
+                                <input type="submit" class="btn btn-sm btn-primary" name="addButton" value="Add to order" />
+                                <button type="button" class="btn btn-sm btn-danger">Clear</button>
+                            </div>
+                        </div>
+                    </div>*@
+            </div>
+        </div>
+        <div class="row">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group" style="display:none">
+                                @Html.LabelFor(m => m.SalesOrder.TotalDiscountPercentage, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.TotalDiscountPercentage, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.TotalDiscountPercentage, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group" style="display:none">
+                                @Html.LabelFor(m => m.SalesOrder.NetDiscount, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.NetDiscount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.NetDiscount, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            @*<div class="form-group">
+                                    @Html.LabelFor(m => m.SalesOrder.VATPercentage, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SalesOrder.VATPercentage, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.VATPercentage, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>*@
+
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group" style="display:none">
+                                @Html.LabelFor(m => m.SalesOrder.TotalDiscountAmount, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.TotalDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.TotalDiscountAmount, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group" style="display:none">
+                                @Html.LabelFor(m => m.SalesOrder.Remarks, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.Remarks, new { htmlAttributes = new { @class = "input-sm form-control input-sm", type = "text", } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.Remarks, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+
+
+                        </div>
+                        <div class="col-md-4" style="padding-right: 5px !important;">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.TotalAmount, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.TotalAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.TotalAmount, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.PaymentDue, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.PaymentDue, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.PaymentDue, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+
+                            <div class="form-group">
+                                <div class="col-md-offset-4 col-md-8">
+                                    <input type="submit" class="btn btn-sm btn-primary pull-right" name="submitButton" value="Save order" />
+                                    @*<button type="button" class="btn btn-sm btn-danger">Clear</button>*@
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+
+    <div id="NewCustomerModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h5 class="modal-title">Create New Retail Customer</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 col-md-3 col-lg-3" for="txtNewCustomerName">Name:</label>
+                            <div class=" col-sm-9 col-md-9 col-lg-9">
+                                <input type="text" class="form-control input-sm" id="txtNewCustomerName" placeholder="Enter Name" name="txtNewCustomerName">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 col-md-3 col-lg-3" for="txtNewCustomerContact">Contact No.:</label>
+                            <div class="col-sm-9 col-md-9 col-lg-9">
+                                <input type="text" class="form-control input-sm" id="txtNewCustomerContact" placeholder="Enter Contact Number" name="txtNewCustomerContact">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 col-md-3 col-lg-3" for="txtNewCustomerAddress">Address:</label>
+                            <div class="col-sm-9 col-md-9 col-lg-9">
+                                <input type="text" class="form-control input-sm" id="txtNewCustomerAddress" placeholder="Enter Address" name="txtNewCustomerAddress">
+                                <input type="hidden" value="0.00" class="form-control input-sm" id="txtNewCustomerOpeningDue" placeholder="Enter Opening Due" name="txtNewCustomerOpeningDue">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+                    <button type="button" id="btnSaveNewCustomer" class="btn btn-primary btn-sm">Save</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+}
+
+
+
+
+
+
+
+<script>
+    $(document).ready(function () {
+        $(window).keydown(function (event) {
+            if (event.keyCode == 10 || event.keyCode == 13) {
+                event.preventDefault();
+                return false;
+            }
+        });
+    });
+
+    $('#OrderDate').datetimepicker({
+        @{
+                if (Model == null || Model.SalesOrder.OrderDate == null) {
+                    @:defaultDate: moment(),
+                                                                                                                    }
+                else
+                {
+            @:defaultDate:'@(Convert.ToDateTime(Model.SalesOrder.OrderDate).ToString("dd-MMM-yyyy"))',
+                                                                                                            }
+            @:format: 'DD-MMM-YYYY'
+                                                                                                                    }
+    });
+
+    $('#RemindDate').datetimepicker({
+        @{
+        if (Model == null || Model.SalesOrder.RemindDate == null)
+        {
+                @:defaultDate: moment(),
+                                        }
+                else
+                {
+                @:defaultDate:'@(Convert.ToDateTime(Model.SalesOrder.RemindDate).ToString("dd-MMM-yyyy"))',
+                                        }
+                @:format: 'DD-MMM-YYYY'
+                            }
+    });
+
+    $("#externalIMENo").on("input", function () {
+        $("#externalIMENoErrorID").hide();
+        setTimeout(function () {
+            $.ajax({
+                url: "/AdvanceSalesOrder/GetProductDetailByIMEINo",
+                type: "GET",
+                data: { 'imeiNo': $("#externalIMENo").val() },
+                dataType: "json",
+                success: function (data) {
+                    if(data==false)
+                    {
+                        $("#externalIMENoErrorID").show();
+                    }
+
+                    setPickerControls(data);
+                    $("#externalIMENo").val('');
+                    $("#externalIMENo").attr('autofocus', 'autofocus');
+                },
+                error: function (err) {
+                    clearPickerControls();
+                    console.error(JSON.stringify(err));
+                }
+            });
+        }, @((User.Identity.GetConcernId() == 5 || User.Identity.GetConcernId() == 6 || User.Identity.GetConcernId() == 1) ? 1000 : 200));
+    });
+
+
+    function setPickerControls(data) {
+        if (data && data.Code != '') {
+            $("#ProductDetailsCode").val(data.Code);
+            $("#ProductDetailsName").val(data.Name);
+            $("#ProductDetailsId").val(data.Id);
+            $("#StockDetailsId").val(data.StockDetailId);
+            $("#ColorsId").val(data.ColorId);
+            $("#SODetail_ColorName").val(data.ColorName);
+            $("#SalesOrder_OfferDescription").text(data.OfferDescription);
+            $("#Offer").val(data.OfferDescription);
+            $("#SODetail_Quantity").val(1);
+            $("#SODetail_IMENo").val(data.IMEINo);
+            $("#SODetail_MRPRate").val(data.MrpRate).trigger("input");
+        }
+        else {
+            clearPickerControls();
+        }
+    }
+
+    function clearPickerControls() {
+        $("#ProductDetailsCode").val('');
+        $("#ProductDetailsName").val('');
+        $("#ProductDetailsId").val('');
+        $("#StockDetailsId").val('');
+        $("#ColorsId").val('');
+        $("#SODetail_ColorName").val('');
+        $("#Offer").val('');
+        $("#SalesOrder_OfferDescription").val('');
+        $("#SODetail_Quantity").val('');
+        $("#SODetail_IMENo").val('');
+        $("#SODetail_MRPRate").val('').trigger("input");
+    }
+
+
+
+    //*************************
+    //Per Product event
+    //*************************
+
+    $("#SODetail_Quantity").on("input",function(){
+        calculateSorderDetailsValue(true);
+    });
+
+    $("#SODetail_MRPRate").on("input", function () {
+        var MRPRate= getDefaultFloatIfEmpty($(this).val());
+        $("#SODetail_UnitPrice").val(MRPRate).trigger("input");
+        $("#SODetail_PPDPercentage").trigger("input");
+    });
+
+    $("#SODetail_UnitPrice").on("input", function () {
+        calculateSorderDetailsValue(false);
+        $("#SODetail_PPDPercentage").trigger("input");
+    });
+
+    $("#SODetail_PPDPercentage").on("input", function () {
+        var percentage = getDefaultFloatIfEmpty($(this).val());
+        var quantity = getDefaultIntIfEmpty($("#SODetail_Quantity").val());
+        var unitpr = getDefaultFloatIfEmpty($("#SODetail_UnitPrice").val());
+        var ppamt = getDefaultFloatIfEmpty((unitpr * percentage) / 100).toFixed(2);
+        $("#SODetail_PPDAmount").val(ppamt);
+        calculateSorderDetailsValue(true) ;
+    });
+
+    $("#SODetail_PPDAmount").on("input", function () {
+        calculateSorderDetailsValue(false) ;
+    });
+
+    $("#SODetail_PPOffer").on("input", function () {
+        calculateSorderDetailsValue(false);
+        $("#SODetail_PPDPercentage").trigger("input");
+    });
+
+
+    function calculateSorderDetailsValue(IsPercent) {
+
+        var quantity = getDefaultIntIfEmpty($("#SODetail_Quantity").val());
+        var unitpr = getDefaultFloatIfEmpty($("#SODetail_UnitPrice").val());
+        var PPDAmount =  getDefaultFloatIfEmpty($("#SODetail_PPDAmount").val());
+        var Offeramount = getDefaultFloatIfEmpty($("#SODetail_PPOffer").val());
+        var utamount = ((unitpr-PPDAmount-Offeramount)*quantity).toFixed(2);
+        $("#SODetail_UTAmount").val(utamount).trigger("input");
+        if(IsPercent!=true)
+        {
+        var percentage = getDefaultFloatIfEmpty((100 * PPDAmount) / (unitpr)).toFixed(2);
+        $("#SODetail_PPDPercentage").val(percentage);
+        }
+
+
+    }
+
+
+    function CalculatePerPcsRate()
+    {
+        var ParentUnitPrice = getDefaultFloatIfEmpty($("#SODetail_RatePerArea").val());
+        var ConvertValue = getDefaultFloatIfEmpty($("#SODetail_ConvertValue").val());
+        var UnitPrice =parseFloat(ParentUnitPrice/ConvertValue).toFixed(4);
+        $("#SODetail_TotalArea").val("0").trigger("input");
+        $("#SODetail_UnitPrice").val(UnitPrice).trigger("input");
+    }
+
+    //====================Tiles Start==============
+    $("#SODetail_ParentQuantity").on('input', function () {
+        CalculateTotalQty();
+        CalculateTotalArea();
+    });
+
+    $("#SODetail_ChildQuantity").on('input', function () {
+        CalculateTotalQty();
+        CalculateTotalArea();
+    });
+
+    function CalculateTotalQty() {
+        var ConvertValue = getDefaultFloatIfEmpty($("#SODetail_ConvertValue").val());
+        var ChildQty = getDefaultFloatIfEmpty($("#SODetail_ChildQuantity").val());
+        var ParentQty = getDefaultFloatIfEmpty($("#SODetail_ParentQuantity").val());
+        var TotalQty = parseFloat((ConvertValue * ParentQty) + ChildQty);
+        $("#SODetail_Quantity").val(TotalQty).trigger('input');
+    }
+
+    $("#SODetail_RatePerArea").on('input', function () {
+        CalculateTotalArea();
+    });
+
+    $("#SODetail_TotalArea").on('input', function () {
+        CalculatePcsFromArea(this.value);
+    });
+
+    function CalculateTotalArea() {
+        var SizeName = $("#SODetail_SizeName").val();
+        var CategoryName = $("#SODetail_CategoryName").val();
+        var spSize = SizeName.split('x');
+        if (CategoryName == "Tiles") {
+            var TotalQty = $("#SODetail_Quantity").val();
+            var FractionQty = $("#SODetail_FractionQty").val();
+            TotalQty=TotalQty+FractionQty;
+            var SqFtPerPcs =GetSqftPerPcs(spSize[0],spSize[1]); //sq ft
+            var TotalAreaSqft =$("#SODetail_TotalArea").val(); //parseFloat(SqFtPerPcs * TotalQty); //sq ft
+            //$("#SODetail_TotalArea").val(TotalAreaSqft);
+            var RatePerSqFt = getDefaultFloatIfEmpty($("#SODetail_RatePerArea").val()); //rate per sq ft
+            var RatePerPcs = parseFloat(SqFtPerPcs * RatePerSqFt);
+            $("#SODetail_MRPRate").val(RatePerPcs).trigger('input');
+            //var ConvertValue = getDefaultFloatIfEmpty($("#SODetail_ConvertValue").val());
+            //var AreaPerCarton = parseFloat(ConvertValue * SqFtPerPcs);
+            //$("#SODetail_AreaPerCarton").val(AreaPerCarton);
+            CalulateFractionPart(TotalQty,RatePerPcs);
+        }
+        else
+        {
+            CalculatePerPcsRate();
+        }
+    }
+
+    function GetSqftPerPcs(LengthCM,WidthCM)
+    {
+        var Length = parseFloat(LengthCM/2.5).toFixed(4); //Inc
+        var Width = parseFloat(WidthCM/2.5).toFixed(4); // Inc
+        var SqFtPerPcs = ((parseFloat(Length * Width)) / 144); //sq ft
+        return SqFtPerPcs;
+    }
+
+    function CalculatePcsFromArea(TotalArea)
+    {
+        var CategoryName = $("#SODetail_CategoryName").val();
+        var SizeName = $("#SODetail_SizeName").val();
+        var spSize = SizeName.split('x');
+        if (CategoryName == "Tiles") {
+            //var SqFtPerPcs =GetSqftPerPcs(spSize[0],spSize[1]); //sq ft
+            var AreaPerCarton = $("#SODetail_AreaPerCarton").val();
+            var ConvertValue = getDefaultFloatIfEmpty($("#SODetail_ConvertValue").val());
+            var SqFtPerPcs = parseFloat(AreaPerCarton / ConvertValue);//sq ft
+
+            var TotalQty = TotalArea/SqFtPerPcs;
+
+            $("#SODetail_Quantity").val(Math.trunc(TotalQty));
+
+
+            var RatePerSqFt = getDefaultFloatIfEmpty($("#SODetail_RatePerArea").val()); //rate per sq ft
+            var RatePerPcs = parseFloat(SqFtPerPcs * RatePerSqFt);
+            $("#SODetail_MRPRate").val(RatePerPcs).trigger('input');
+
+            CalulateFractionPart(TotalQty,RatePerPcs);
+            //var ConvertValue = getDefaultFloatIfEmpty($("#SODetail_ConvertValue").val());
+            //var AreaPerCarton = parseFloat(ConvertValue * SqFtPerPcs);
+            //$("#SODetail_AreaPerCarton").val(AreaPerCarton);
+
+            var Carton = parseInt(TotalQty/ConvertValue);
+            var Pcs = parseInt(TotalQty%ConvertValue);
+            $("#SODetail_ParentQuantity").val(Carton);
+            $("#SODetail_ChildQuantity").val(Pcs);
+        }
+    }
+
+    function CalulateFractionPart(TotalQty,RatePerPcs)
+    {
+        var FractionQty =parseFloat(TotalQty%1).toFixed(2);
+        var FractionAmt = parseFloat(FractionQty*RatePerPcs).toFixed(4);
+        $("#SODetail_FractionQty").val(FractionQty);
+        $("#SODetail_FractionAmt").val(FractionAmt);
+    }
+    //====================Tiles End==============
+
+    //*************************
+    //Per Product event end
+    //*************************
+
+
+    //Flat discount percentage
+    $("#SalesOrder_TotalDiscountPercentage").on("input", function () {
+        var totalPercentage = getDefaultFloatIfEmpty($(this).val());
+        var totalAmount = getDefaultFloatIfEmpty($("#SalesOrder_GrandTotal").val());
+        var totalDiscountAmount = getDefaultFloatIfEmpty((totalAmount * totalPercentage) / 100).toFixed(2);
+        var vatAmount = getDefaultFloatIfEmpty($("#SalesOrder_VATAmount").val());
+
+        $("#SalesOrder_TotalDiscountAmount").val(totalDiscountAmount);
+        calculateVariousValue(totalDiscountAmount, vatAmount, totalAmount);
+    });
+
+    //Flat discount amount
+    $("#SalesOrder_TotalDiscountAmount").on("input", function () {
+        var totalDiscountAmount = getDefaultFloatIfEmpty($(this).val());
+
+        var totalAmount = getDefaultFloatIfEmpty($("#SalesOrder_GrandTotal").val());
+        var totalPercentage = getDefaultFloatIfEmpty((100 * totalDiscountAmount) / totalAmount).toFixed(2);
+        var vatAmount = getDefaultFloatIfEmpty($("#SalesOrder_VATAmount").val());
+
+        $("#SalesOrder_TotalDiscountPercentage").val(totalPercentage);
+        calculateVariousValue(totalDiscountAmount, vatAmount, totalAmount);
+    });
+
+    $("#SalesOrder_VATPercentage").on("input", function () {
+        var vatPercentage = getDefaultFloatIfEmpty($(this).val());
+        var totalAmount = getDefaultFloatIfEmpty($("#SalesOrder_GrandTotal").val());
+        var netDiscount = getDefaultFloatIfEmpty($("#SalesOrder_NetDiscount").val());
+        var vatAmount = getDefaultFloatIfEmpty(((totalAmount - netDiscount) * vatPercentage) / 100);
+        var totalDiscountAmount = getDefaultFloatIfEmpty($("#SalesOrder_TotalDiscountAmount").val());
+
+        $("#SalesOrder_VATAmount").val(vatAmount.toFixed(2));
+        calculateVariousValue(totalDiscountAmount, vatAmount, totalAmount);
+    });
+
+    $("#SalesOrder_VATAmount").on("input", function () {
+        var vatAmount = getDefaultFloatIfEmpty($(this).val());
+        var totalAmount = getDefaultFloatIfEmpty($("#SalesOrder_GrandTotal").val());
+        var netDiscount = getDefaultFloatIfEmpty($("#SalesOrder_NetDiscount").val());
+        var vatPercentage = getDefaultFloatIfEmpty((100 * vatAmount) / (totalAmount - netDiscount));
+        var totalDiscountAmount = getDefaultFloatIfEmpty($("#SalesOrder_TotalDiscountAmount").val());
+
+        $("#SalesOrder_VATPercentage").val(vatPercentage.toFixed(2));
+        calculateVariousValue(totalDiscountAmount, vatAmount, totalAmount);
+    });
+
+    $("#SalesOrder_RecieveAmount").on("input", function () {
+        var totalAmount = getDefaultFloatIfEmpty($("#SalesOrder_GrandTotal").val());
+        var totalDiscountAmount = getDefaultFloatIfEmpty($("#SalesOrder_TotalDiscountAmount").val());
+        var vatAmount = getDefaultFloatIfEmpty($("#SalesOrder_VATAmount").val());
+        calculateVariousValue(totalDiscountAmount, vatAmount, totalAmount);
+    });
+
+    $("#SalesOrder_AdjAmount").on("input", function () {
+        var totalAmount = getDefaultFloatIfEmpty($("#SalesOrder_GrandTotal").val());
+        var totalDiscountAmount = getDefaultFloatIfEmpty($("#SalesOrder_TotalDiscountAmount").val());
+        var vatAmount = getDefaultFloatIfEmpty($("#SalesOrder_VATAmount").val());
+        calculateVariousValue(totalDiscountAmount, vatAmount, totalAmount);
+    });
+
+    //$("#SalesOrder_CurrentDue").on("input", function () {
+    //    if (window.location.pathname.toLowerCase() == "/salesorder/create") {
+    //        var totalAmount = getDefaultFloatIfEmpty($("#SalesOrder_GrandTotal").val());
+    //        var totalDiscountAmount = getDefaultFloatIfEmpty($("#SalesOrder_TotalDiscountAmount").val());
+    //        var vatAmount = getDefaultFloatIfEmpty($("#SalesOrder_VATAmount").val());
+    //        calculateVariousValue(totalDiscountAmount, vatAmount, totalAmount);
+    //    }
+    //});
+
+    function calculateVariousValue(flatDiscountAmount, vatAmount, GrandtotalAmount) {
+        var netDiscountAmount = getDefaultFloatIfEmpty($("#SalesOrder_PPDiscountAmount").val());
+        var recieveAmount = getDefaultFloatIfEmpty($("#SalesOrder_RecieveAmount").val());
+        var adjAmount = getDefaultFloatIfEmpty($("#SalesOrder_AdjAmount").val());
+        var TotalOffer=getDefaultFloatIfEmpty($("#SalesOrder_TotalOffer").val());
+        //var dueAmount = getDefaultFloatIfEmpty($("#SalesOrder_CurrentDue").val());
+        var tempFlatDisAmount=getDefaultFloatIfEmpty($("#SalesOrder_TempFlatDiscountAmount").val());
+        var updateFlateDisAmt = flatDiscountAmount-tempFlatDisAmount;
+        var updatedDiscountAmount = parseFloat(updateFlateDisAmt) + parseFloat(netDiscountAmount) + parseFloat(TotalOffer);
+
+        $("#SalesOrder_TotalDiscountAmount").val(flatDiscountAmount);
+        $("#SalesOrder_NetDiscount").val(getDefaultFloatIfEmpty(updatedDiscountAmount).toFixed(2));
+        $("#SalesOrder_TotalAmount").val(getDefaultFloatIfEmpty((GrandtotalAmount - (updatedDiscountAmount + adjAmount)) + vatAmount).toFixed(4));
+        $("#SalesOrder_PaymentDue").val(getDefaultFloatIfEmpty(((GrandtotalAmount - (updatedDiscountAmount + adjAmount)) + vatAmount) - recieveAmount).toFixed(4));
+    }
+
+
+    //******************************************************
+    //          Create New Retail Customer Start
+    //******************************************************
+    $(document).on('click','#btnSaveNewCustomer',function(){
+        //alert("OK")
+        var name = $("#txtNewCustomerName").val();
+        var Contact = $("#txtNewCustomerContact").val();
+        var Address = $("#txtNewCustomerAddress").val();
+        var OpeningDue = $("#txtNewCustomerOpeningDue").val();
+        var CustomerType ="@EnumCustomerType.Retail";
+        if(name=="")
+        {
+            $("#txtNewCustomerName").attr('style','border:1px solid red !important');
+        }
+        else
+        {
+            $("#txtNewCustomerName").attr('style','border:1px solid #c4daf1  !important');
+        }
+        if(Contact=="")
+        {
+            $("#txtNewCustomerContact").attr('style','border:1px solid red !important');
+        }
+        else
+        {
+            $("#txtNewCustomerContact").attr('style','border:1px solid #c4daf1  !important');
+        }
+        if(Address=="")
+        {
+            $("#txtNewCustomerAddress").attr('style','border:1px solid red !important');
+        }
+        else
+        {
+            $("#txtNewCustomerAddress").attr('style','border:1px solid #c4daf1  !important');
+        }
+        if(OpeningDue=="")
+        {
+            $("#txtNewCustomerOpeningDue").attr('style','border:1px solid red !important');
+        }
+        else
+        {
+            $("#txtNewCustomerOpeningDue").attr('style','border:1px solid #c4daf1  !important');
+        }
+        if(name==""||Contact==""||Address==""||OpeningDue=="")
+        {
+            return;
+        }
+        var model ={
+            Id :0,
+            Code:"",
+            Name:name,
+            ContactNo:Contact,
+            Address:Address,
+            TotalDue:OpeningDue,
+            CustomerType:CustomerType
+        };
+
+        $.ajax({
+            url: "/Customer/CreateCustomer",
+            type: "POST",
+            data:model,
+            dataType: "json",
+            success: function (data) {
+                if(data.Result==false)
+                {
+                    toastr.error(data.ErrorMsg);
+                }
+                else
+                {
+                    toastr.info(data.ErrorMsg);
+                    $("#NewCustomerModal").modal('toggle');
+                    SetCustomerData(data.Customer)
+                    ClearTextBox();
+
+                    var newOption = $('<option>');
+                    newOption.val(data.Customer.Id);
+                    newOption.text(data.Customer.Name);
+                    $('#txtCustomerId').append(newOption);
+
+
+                    $('#txtCustomerId').val(data.Customer.Id);
+                    loadCustomerInfo(data.Customer.Id);
+                }
+            },
+            error: function (err) {
+                toastr.error(JSON.stringify(err));
+            }
+        });
+    });
+
+    function SetCustomerData(Customer)
+    {
+        $("#CustomersCode").val(Customer.Code);
+        $("#CustomersName").val(Customer.Name);
+        $("#CustomersId").val(Customer.Id);
+        $("#SalesOrder_CurrentDue").val(Customer.TotalDue);
+    }
+
+    function ClearTextBox()
+    {
+        $("#txtNewCustomerName").val("");
+        $("#txtNewCustomerContact").val("");
+        $("#txtNewCustomerAddress").val("");
+        $("#txtNewCustomerOpeningDue").val(0);
+    }
+
+    //******************************************************
+    //          Product data populate with new picker
+    //******************************************************
+    $('#txtProductId').change(function () {
+        var prId = getDefaultIntIfEmpty($(this).val());
+        if (prId > 0) {
+            loadProductInfo(prId);
+        }
+    });
+
+    $('#txtCustomerId').change(function () {
+        var cusId = getDefaultIntIfEmpty($(this).val());
+        if (cusId > 0) {
+            loadCustomerInfo(cusId);
+        }
+    });
+
+    $('#txtEmployeeId').change(function () {
+        var empId = getDefaultIntIfEmpty($(this).val());
+        if (empId > 0) {
+            loadEmployeeInfo(empId);
+        }
+    });
+
+    //$('#txtDepotId').change(function () {
+    //    var depId = getDefaultIntIfEmpty($(this).val());
+    //    if (depId > 0) {
+    //        loadDepotInfo(depId);
+    //    }
+    //});
+    function loadProductInfo(productId) {
+        $.ajax({
+            url: "/AdvanceSalesOrder/GetProductInfoById",
+            type: "GET",
+            data: { 'productId' : productId },
+            dataType: "json",
+            success: function (product) {
+                var Category = $.trim(product.CategoryName);
+                var UnitType = $.trim(product.ParentUnit);
+
+                $('[id*="_TotalArea"]').val('').trigger("input");
+                $('#ProductDetailsCode').val($.trim(product.ProductCode));
+                $('#ProductDetailsName').val($.trim(product.ProductName));
+                $('#ProductDetailsId').val($.trim(product.ProductId));
+                $('#StockDetailsId').val($.trim(product.StockDetailsId));
+                $('#ColorsId').val($.trim(product.ColorId));
+
+
+                $('[id*="_IMENo"]').val($.trim(product.IMENo));
+                $('[id*="_ColorName"]').val($.trim(product.ColorName));
+                $('[id*="_CategoryName"]').val($.trim(product.CategoryName));
+                $('[id*="_PreviousStock"]').val($.trim(product.PreStock));
+                $('[id*="_RatePerArea"]').val($.trim(product.ParentMRP)).trigger("input");
+                $('[id*="_MRPRate"]').val($.trim(product.MRPRate)).trigger("input");
+                $('[id*="_Quantity"]').val('1');
+
+                $("#lblParentUnit").text($.trim(product.ParentUnit));
+                $("#lblChildUnit").text($.trim(product.ChildUnit));
+                $("#lblMRP").text('Rate/' + $.trim(product.ChildUnit));
+                $("#lblConvertValue").text($.trim(product.ChildUnit) + '/' + $.trim(product.ParentUnit));
+                $("#lblRatePerArea").text($.trim('Rate/' + $.trim(product.ParentUnit)));
+                $('[id*="_ConvertValue"]').val($.trim(product.ConvertValue));
+                $('[id*="_SizeName"]').val($.trim(product.SizeName));
+                $('[id*="_AreaPerCarton"]').val($.trim(product.SalesCSft));
+
+
+                ToggleTilesField(Category);
+                ToggleUnitPriceField(UnitType);
+            },
+            error: function (err) {
+                toastr.error(JSON.stringify(err));
+                console.log(JSON.stringify(err))
+            }
+        });
+    }
+
+    function loadCustomerInfo(customerId) {
+        $.ajax({
+            url: "/AdvanceSalesOrder/GetCustomerInfoById",
+            type: "GET",
+            data: { 'customerId': customerId },
+            dataType: "json",
+            success: function (customer) {
+                $('#CustomersCode').val($.trim(customer.Code));
+                $('#CustomersName').val($.trim(customer.Name));
+                $('#CustomersId').val($.trim(customer.Id));
+                $('[id*="CurrentDue"]').val($.trim(customer.TotalDue));
+                $('#txtCustomerId').val($.trim(customer.Id));
+
+                $('#txtCustomerId option[value="' + customerId + '"]').prop('selected', true);
+            },
+            error: function (err) {
+                toastr.error(JSON.stringify(err));
+                console.log(JSON.stringify(err))
+            }
+        });
+    }
+    function loadEmployeeInfo(employeeId) {
+        $.ajax({
+            url: "/SalesOrder/GetEmployeeInfoById",
+            type: "GET",
+            data: { 'employeeId': employeeId },
+            dataType: "json",
+            success: function (employee) {
+                $('#EmployeesCode').val($.trim(employee.Code));
+                $('#EmployeesName').val($.trim(employee.Name));
+                $('#EmployeesId').val($.trim(employee.Id));
+            },
+            error: function (err) {
+                toastr.error(JSON.stringify(err));
+                console.log(JSON.stringify(err))
+            }
+        });
+    }
+
+    //function loadDepotInfo(depotId) {
+    //    $.ajax({
+    //        url: "/SalesOrder/GetDepotInfoById",
+    //        type: "GET",
+    //        data: { 'depotId': depotId },
+    //        dataType: "json",
+    //        success: function (depot) {
+    //            $('#DepotsCode').val($.trim(depot.Code));
+    //            $('#DepotsName').val($.trim(depot.Name));
+    //            $('#DepotsId').val($.trim(depot.Id));
+    //        },
+    //        error: function (err) {
+    //            toastr.error(JSON.stringify(err));
+    //            console.log(JSON.stringify(err))
+    //        }
+    //    });
+    //}
+    //******************************************************
+    //          Create New Retail Customer end
+    //******************************************************
+
+</script>

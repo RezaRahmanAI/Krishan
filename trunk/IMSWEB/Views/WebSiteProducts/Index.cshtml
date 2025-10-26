@@ -1,0 +1,68 @@
+﻿@model IEnumerable<IMSWEB.WebsiteProductViewModels>
+
+@{
+    ViewBag.Title = "WebProduct";
+}
+
+<h4 class="text-left inline-header">Existing Notice</h4>
+@Html.ActionLink("Create new", "Create", "WebSiteProducts", routeValues: null, htmlAttributes: new { @class = "btn btn-primary btn-sm pull-right" })
+<hr />
+
+<table id="companyTable"
+       data-toggle="table"
+       data-search="true"
+       data-show-refresh="true"
+       data-show-toggle="true"
+       data-show-columns="true"
+       data-show-export="true"
+       data-detail-view="true"
+       data-pagination="true"
+       data-id-field="name"
+       data-page-list="[10, 25, 50, 100, ALL]"
+       data-page-size="10"
+       class="table table-responsive table-bordered table-striped" cellspacing="0" width="100%">
+    <thead>
+        <tr>
+            <th>
+                Sl
+            </th>
+            <th data-field="Tilte"
+                data-sortable="true">
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th data-field="name"
+                data-sorter="sorter"
+                data-sortable="true">
+                @Html.DisplayNameFor(model => model.ProcutCategory)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            int count = 1;
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @count
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Title)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ProcutCategory)
+                    </td>
+
+                    <td>
+                        @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                        @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new { onclick = "if(!confirm('Do you want to delete this Notice?')) return false;" })|
+                        @*@Html.ActionLink("View", "View", new { id = item.Id })*@
+                    </td>
+                </tr>
+                count++;
+            }
+
+        }
+    </tbody>
+</table>

@@ -1,0 +1,243 @@
+﻿@using IMSWEB.Model
+@model IMSWEB.CreateBankTransactionViewModel
+@{
+    string actionName = ViewContext.RouteData.Values["action"].ToString();
+    ViewBag.Title = actionName + " BankTransaction";
+}
+<h4 class="inline-header">@(ViewBag.Title + ".")</h4>
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                @using (Html.BeginForm(actionName, "BankTransaction", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", enctype = "multipart/form-data", role = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.BankTranID);
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.TransactionNo, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class=" col-md-8">
+                            @Html.EditorFor(model => model.TransactionNo, new { htmlAttributes = new { @class = "form-control input-sm" } })
+                            @Html.ValidationMessageFor(model => model.TransactionNo, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.TranDate, htmlAttributes: new { @class = "control-label col-md-4", autofocus = "autofocus" })
+                        <div class=" col-md-8">
+                            @*@Html.EditorFor(model => model.EntryDate, new { htmlAttributes = new { @class = "form-control input-sm" } })*@
+                            <div class='input-group date' id='TranDate' tabindex="2">
+                                <input type='text' class="input-sm form-control input-sm" name='TranDate' />
+                                <span class="input-group-addon">
+                                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.TranDate, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+
+
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.BankID, new { @class = "control-label col-md-4" })
+                        <div class=" col-md-8">
+                            @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Bank, id = (Model != null && Model.BankID != null) ? Model.BankID : "0" });}
+                            @Html.ValidationMessageFor(m => m.BankID, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.TransactionType, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class=" col-md-8">
+                            @*"--Select a type--",*@
+                            @Html.EnumDropDownListFor(model => model.TransactionType, "--Select Transaction Type--", new { @class = "form-control input-sm" })
+                            @Html.ValidationMessageFor(model => model.TransactionType, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="display:none">
+                        @Html.LabelFor(m => m.CustomerID, new { @class = "control-label col-md-4" })
+                        <div class=" col-md-8">
+                            @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.ExceptCreditCustomer, id = (Model != null && Model.CustomerID != null) ? Model.CustomerID : "0" });}
+                            @Html.ValidationMessageFor(m => m.CustomerID, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="display:none">
+                        @Html.LabelFor(m => m.SupplierID, new { @class = "control-label col-md-4" })
+                        <div class=" col-md-8">
+                            @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Supplier, id = (Model != null && Model.SupplierID != null) ? Model.SupplierID : "0" });}
+                            @Html.ValidationMessageFor(m => m.SupplierID, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.AnotherBankID, new { @class = "control-label col-md-4" })
+                        <div class=" col-md-8">
+                            @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.AnotherBank, id = (Model != null && Model.AnotherBankID != null) ? Model.AnotherBankID : "0" });}
+                            @Html.ValidationMessageFor(m => m.AnotherBankID, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Amount, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class=" col-md-8">
+                            @*"--Select a type--",*@
+                            @Html.EditorFor(model => model.Amount, new { htmlAttributes = new { @class = "form-control input-sm  text-right", @type = "number" } })
+                            @Html.ValidationMessageFor(model => model.Amount, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.ChecqueNo, new { @class = "control-label col-md-4" })
+                        <div class=" col-md-8">
+                            @Html.EditorFor(m => m.ChecqueNo, new { htmlAttributes = new { @class = "form-control input-sm", autofocus = "autofocus" } })
+                            @Html.ValidationMessageFor(m => m.ChecqueNo, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.Remarks, new { @class = "control-label col-md-4" })
+                        <div class=" col-md-8">
+                            @Html.EditorFor(m => m.Remarks, new { htmlAttributes = new { @class = "form-control input-sm", autofocus = "autofocus" } })
+                            @Html.ValidationMessageFor(m => m.Remarks, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="text-right mr-4">
+                            <input type="submit" class="btn btn-sm btn-primary" value="Add BankTransaction" />
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3"></div>
+</div>
+
+
+
+
+<script>
+
+
+    $(function () {
+        $("#TransactionType").change(function () {
+            var t = $(this).val();
+            if (t !== "") {
+                if (t == "1") {
+                    $("#CustomerPicker").prop('disabled', true);
+                    $("#SupplierPicker").prop('disabled', true);
+                    $("#AnotherBankPicker").prop('disabled', true);
+
+                }
+
+                else if (t == "2") {
+                    $("#CustomerPicker").prop('disabled', true);
+                    $("#SupplierPicker").prop('disabled', true);
+                    $("#AnotherBankPicker").prop('disabled', true);
+                }
+                else if (t == "3") {
+                    $("#CustomerPicker").prop('disabled', false);
+                    $("#SupplierPicker").prop('disabled', true);
+                    $("#AnotherBankPicker").prop('disabled', true);
+                }
+                else if (t == "4") {
+                    $("#CustomerPicker").prop('disabled', true);
+                    $("#SupplierPicker").prop('disabled', false);
+                    $("#AnotherBankPicker").prop('disabled', true);
+                }
+                else if (t == "5") {
+                    $("#CustomerPicker").prop('disabled', true);
+                    $("#SupplierPicker").prop('disabled', true);
+                    $("#AnotherBankPicker").prop('disabled', false);
+                }
+                else {
+                    $("#CustomerPicker").prop('disabled', false);
+                    $("#SupplierPicker").prop('disabled', false);
+                    $("#AnotherBankPicker").prop('disabled', false);
+                }
+
+
+            }
+
+
+        });
+    });
+
+    $(document).ready(function () {
+
+        var t = $("#TransactionType");
+
+        if (t !== "") {
+            if (t == "1") {
+                $("#CustomerPicker").prop('disabled', true);
+                $("#SupplierPicker").prop('disabled', true);
+                $("#AnotherBankPicker").prop('disabled', true);
+
+            }
+
+            else if (t == "2") {
+                $("#CustomerPicker").prop('disabled', true);
+                $("#SupplierPicker").prop('disabled', true);
+                $("#AnotherBankPicker").prop('disabled', true);
+            }
+            else if (t == "3") {
+                $("#CustomerPicker").prop('disabled', false);
+                $("#SupplierPicker").prop('disabled', true);
+                $("#AnotherBankPicker").prop('disabled', true);
+            }
+            else if (t == "4") {
+                $("#CustomerPicker").prop('disabled', true);
+                $("#SupplierPicker").prop('disabled', false);
+                $("#AnotherBankPicker").prop('disabled', true);
+            }
+            else if (t == "5") {
+                $("#CustomerPicker").prop('disabled', true);
+                $("#SupplierPicker").prop('disabled', true);
+                $("#AnotherBankPicker").prop('disabled', false);
+            }
+            else {
+                $("#CustomerPicker").prop('disabled', true);
+                $("#SupplierPicker").prop('disabled', true);
+                $("#AnotherBankPicker").prop('disabled', true);
+            }
+
+
+        }
+
+
+
+
+
+    });
+
+
+
+
+
+
+
+    $(function () {
+
+        $('#TranDate').datetimepicker({
+            @{
+                if (Model == null || Model.TranDate == null)
+                {
+                    @:defaultDate: moment(),
+                                }
+    else
+    {
+    @:defaultDate: '@(Convert.ToDateTime(Model.TranDate).ToString("dd-MMM-yyyy"))',
+                }
+    @:format: 'DD-MMM-YYYY'
+                }
+        });
+
+    });
+
+
+</script>

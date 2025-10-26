@@ -1,0 +1,94 @@
+﻿@model IEnumerable<ProductionSetupViewModel>
+@{
+    ViewBag.Title = "Production Setups";
+    string actionName = ViewContext.RouteData.Values["action"].ToString();
+    string controllerName = ViewContext.RouteData.Values["controller"].ToString();
+}
+<h4 class="text-left inline-header">Existing @ViewBag.Title</h4>
+@Html.ActionLink("Create new Setup", "Create", controllerName, routeValues: null, htmlAttributes: new { @class = "btn btn-primary btn-sm pull-right", @id = "toolbar" })
+<hr />
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel">
+            <div class="panel-body">
+                <table id="cashcollectionTable"
+                       data-toggle="table"
+                       data-search="true"
+                       data-show-refresh="true"
+                       data-show-toggle="true"
+                       data-show-columns="true"
+                       data-show-export="true"
+                       data-detail-view="true"
+                       data-pagination="true"
+                       data-id-field="name"
+                       data-page-list="[10, 25, 50, 100, ALL]"
+                       data-page-size="10"
+                       data-toolbar="#toolbar"
+                       class="table table-responsive table-bordered table-striped" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th>
+                                Sl
+                            </th>
+                            <th data-field="code"
+                                data-sorter="sorter"
+                                data-sortable="true">
+                                @Html.DisplayNameFor(model => model.ProductName)
+                            </th>
+                            <th>
+                                Action
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int count = 1;
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        @count
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.ProductName)
+                                    </td>
+                                    <td>
+                                        @if (User.IsInRole("Admin") || User.IsInRole("LocalAdmin"))
+                                        {
+                                            @Html.ActionLink("Invoice", "Invoice", new { orderId = item.PSID })
+                                            <span>|</span>
+                                            @Html.ActionLink("Edit", "Edit", new { id = item.PSID })
+                                            <span>|</span>
+                                            @Html.ActionLink("Delete", "Delete", new { id = item.PSID }, new { onclick = "if(!confirm('Do you want to delete this Transaction?')) return false;" })
+                                        }
+                                    </td>
+                                </tr>
+                                count++;
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+   @{
+    if (TempData.ContainsKey("IsProductionSetupReadyById") && Convert.ToBoolean(TempData["IsProductionSetupReadyById"]) == true)
+    {
+        @:$.ajax({
+                      @:url: "/Report/ProductionSetupInvoiceByID",
+                      @:type: "GET",
+                      @:dataType: "html",
+                      @:success: function (data) {
+                                      @:$('#report').html(data);
+                                      @:},
+               @:error: function (err) {
+                                          @:console.error(JSON.stringify(err));
+                                          @:}
+               @:});
+     }
+    }
+</script>

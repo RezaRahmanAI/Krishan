@@ -1,0 +1,197 @@
+﻿@model IEnumerable<GetProductViewModel>
+<div class="input-group">
+    <input type="text" class="input-sm form-control input-sm" id="ProductsCode" name="ProductsCode" value="@ViewBag.ProductsCode" readonly="readonly">
+    <span class="input-group-btn">
+        <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#ProductsModal"><i class="fa fa-plus-circle" aria-hidden="true"></i>&nbsp;Pick</button>
+    </span>
+    <input type="text" class="input-sm form-control input-sm" id="ProductsName" name="ProductsName" value="@ViewBag.ProductsName" readonly="readonly">
+    <input type="hidden" class="input-sm form-control input-sm" id="ProductsId" name="ProductsId" value="@ViewBag.ProductsId" readonly="readonly">
+    <input type="hidden" class="input-sm form-control input-sm" id="ProductsType" name="ProductsType" value="@ViewBag.ProductsType" readonly="readonly">
+</div>
+
+<!-- Modal -->
+<div class="modal fade bs-example-modal-lg" id="ProductsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h5 class="modal-title" id="myModalLabel">Existing Products</h5>
+            </div>
+            <div class="modal-body">
+                <div id="Productstoolbar">
+                    @Html.ActionLink("Create new", "Create", "Product", routeValues: null, htmlAttributes: new { @class = "btn btn-primary btn-sm", target = "_blank" })
+                    <span class="text-warning">&nbsp;(Requires reload current page to get new item)</span>
+                </div>
+                <table id="ProductsTable"
+                       data-toolbar="#Productstoolbar"
+                       data-toggle="table"
+                       data-search="true"
+                       data-click-to-select="true"
+                       data-single-select="true"
+                       data-detail-view="false"
+                       data-pagination="true"
+                       data-id-field="name"
+                       data-page-list="[10, 25, 50, 100, ALL]"
+                       data-page-size="6"
+                       class="table table-responsive table-bordered table-striped" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th data-field="id" class="hidden">
+                            </th>
+                            <th data-field="ConvertValue" class="hidden">
+                            </th>
+                            <th data-checkbox="true">
+                            </th>
+                            <th>
+                                Sl
+                            </th>
+                            <th data-field="code"
+                                data-sortable="true">
+                                Code
+                            </th>
+                            <th data-field="name"
+                                data-sorter="sorter"
+                                data-sortable="true">
+                                Name
+                            </th>
+                            <th data-field="category"
+                                data-sorter="sorter"
+                                data-sortable="true">
+                                Category
+                            </th>
+                            <th class="hidden" data-field="ParentUnit"
+                                data-sorter="sorter"
+                                data-sortable="true">
+                                Unit
+                            </th>
+                            <th class="hidden" data-field="ChildUnit"
+                                data-sorter="sorter"
+                                data-sortable="true">
+                                Unit
+                            </th>
+                            <th data-field="ProductsType" class="hidden"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int count = 1;
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="hidden">
+                                        @item.ProductId
+                                    </td>
+                                    <td class="hidden">
+                                        @item.ConvertValue
+                                    </td>
+                                    <td></td>
+                                    <td>
+                                        @count
+                                    </td>
+                                    <td>
+                                        @item.ProductCode
+                                    </td>
+                                    <td>
+                                        @item.ProductName
+                                    </td>
+                                    <td>
+                                        @item.CategoryName
+                                    </td>
+                                    <td class="hidden">
+                                        @item.ParentUnit
+                                    </td>
+                                    <td class="hidden">
+                                        @item.ChildUnit
+                                    </td>
+                                    <td class="hidden">
+                                        @item.ProductType
+                                    </td>
+                                </tr>
+                                count++;
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var $table = $('#ProductsTable');
+    $(document).ready(function () {
+        $('[id*="_PreviousStock"]').val(@ViewBag.ProductsPreviousStock);
+    });
+    $table.on('check.bs.table', function (e, row) {
+
+        var Category = $.trim(row.category);
+        var UnitType = $.trim(row.ParentUnit);
+        $('#CategoryName').val($.trim(row.category));
+
+        if (Category == "Tiles")
+        {
+            $("#AreaPerCartondiv").show();
+            $("#TotalAreadiv").show();
+            $("#RatePerAreadiv").show();
+            $("#PODetail_MRPRateParent").prop("readonly", true);
+            $("#PODetail_MRPRate").prop("readonly", true);
+        }
+        else
+        {
+            $("#AreaPerCartondiv").hide();
+            $("#TotalAreadiv").hide();
+            $("#RatePerAreadiv").hide();
+            $("#PODetail_MRPRateParent").prop("readonly", false);
+            $("#PODetail_MRPRate").prop("readonly", false);
+        }
+
+        $('#ProductsCode').val($.trim(row.code));
+        $('#ProductsName').val($.trim(row.name));
+        $('#ProductsId').val($.trim(row.id));
+        $('#ProductsType').val($.trim(row.ProductsType));
+
+        $('[id*="_PreviousStock"]').val($.trim(row.preStock));
+        $('[id*="_MRPRate"]').val($.trim(row.MRP)).trigger("input");
+        $('[id*="_DP"]').val($.trim(row.DP)).trigger("input");
+
+        $("#lblParentUnit").text($.trim(row.ParentUnit));
+        $("#lblChildUnit").text($.trim(row.ChildUnit));
+        $("#lblMRPParent").text('Rate/' + $.trim(row.ParentUnit));
+        $("#lblMRP").text('Rate/' + $.trim(row.ChildUnit));
+        $("#lblDPParent").text('Rate/' + $.trim(row.ParentUnit));
+        $("#lblDP").text('Rate/' + $.trim(row.ChildUnit));
+        $("#lblConvertValue").text($.trim(row.ChildUnit) + '/' + $.trim(row.ParentUnit));
+        $('[id*="_ConvertValue"]').val($.trim(row.ConvertValue));
+        //$('[id*="_ConvertValue"]').val($.trim(row.ConvertValue));
+        $('[id*="_SizeName"]').val($.trim(row.SizeName));
+        $('[id*="_AreaPerCarton"]').val($.trim(row.PurchaseCSft));
+        $('[id*="_DiaSizeName"]').val($.trim(row.DiaSizeName));
+        ToggleUnitPriceField(UnitType);
+
+    });
+    $table.on('uncheck.bs.table', function (e, row) {
+        $('#ProductsCode').val('');
+        $('#ProductsName').val('');
+        $('#ProductsId').val('');
+        $('#ProductsType').val('');
+        $('[id*="_PreviousStock"]').val('');
+        $('[id*="_MRPRate"]').val('').trigger("input");
+        $('[id*="_DP"]').val('').trigger("input");
+        $('#CategoryName').val('');
+
+    });
+
+    function ToggleUnitPriceField(UnitType) {
+        if (UnitType.toLowerCase() == "pcs") {
+
+            $("#divUnitPrice").hide();
+            $("#divChildQuantity").hide();
+        }
+        else {
+            $("#divUnitPrice").show();
+            $("#divChildQuantity").show();
+        }
+    }
+</script>

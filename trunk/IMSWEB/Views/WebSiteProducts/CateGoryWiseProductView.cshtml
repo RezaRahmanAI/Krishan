@@ -1,0 +1,48 @@
+﻿@model IEnumerable<IMSWEB.WebsiteProductViewModels>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<h2>Product</h2>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center mb-5 d-sm-flex d-md-flex">
+                <span><a class="px-5 fs-5 text-success fw-bold" href="#">All</a></span>
+                <span class="px-5 arv-btn"><a class="fs-5 text-dark fw-bold" style="text-decoration: none;" href="@Url.Action("CateGoryWiseProductView", "WebSiteProducts")" id="Mosquitos">Mosquitos</a></span>
+                <span class="px-5 arv-btn"><a class="fs-5 text-dark fw-bold" style="text-decoration: none;" href="#">Ants</a></span>
+                <span class="px-5 arv-btn"><a class="fs-5 text-dark fw-bold" style="text-decoration: none;" href="#">Termites</a></span>
+                <span class="px-5 arv-btn"><a class="fs-5 text-dark fw-bold" style="text-decoration: none;" href="#">Fleas</a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="hideForCategoryProduct">
+        @if (Model != null && Model.Any())
+        {
+            var top8Items = Model.OrderByDescending(item => item.CreateDate).Take(8);
+
+            foreach (var item in top8Items)
+            {
+                <div class="col-6 col-lg-3 col-md-4 mb-5">
+                    <div class="Product-item text-center">
+                        @*<a class="mb-3" href="/Product-details.html"> </a>*@
+                        <img class="mw-100" style="width: 200px;" src="@item.DocumentPath" alt="">
+                        <p class="fs-5">@item.Price</p>
+                        <span><a class="fs-5 fw-bold text-dark" style="text-decoration: none;" href="#">@item.Title</a></span>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+</div>
+
+<script>
+    $("Mosquitos").click(function () {
+        alert("The paragraph was clicked.");
+
+    });
+</script>

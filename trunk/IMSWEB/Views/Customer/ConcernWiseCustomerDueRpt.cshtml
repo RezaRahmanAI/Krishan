@@ -1,0 +1,48 @@
+﻿@using IMSWEB.Model
+@model SalesOrderViewModel
+
+@{
+    ViewBag.Title = "Category Wise Customer Due Report";
+}
+
+<h4>@(ViewBag.Title + ".")</h4>
+<hr />
+@using (Ajax.BeginForm("ConcernWiseCustomerDueRpt", "Report", new { ReturnUrl = ViewBag.ReturnUrl }, ajaxOptions: new AjaxOptions { HttpMethod = "Post", UpdateTargetId = "report", LoadingElementId = "spinningIcon" }, htmlAttributes: new { role = "form" }))
+{
+    <div class="col-sm-5 col-sm-offset-3">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="form-group">
+                    @Html.LabelFor(m => m.SalesOrder.CustomerId, new { @class = "control-label col-sm-2", autofocus = "autofocus" })
+                    <div class="col-sm-10">
+                        @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Customer, id = (Model != null && Model.SalesOrder.CustomerId != null) ? Model.SalesOrder.CustomerId : "0" });}
+                        @Html.ValidationMessageFor(m => m.SalesOrder.CustomerId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class='col-sm-10 input-group col-sm-offset-2' id='rbReportType'>
+                        <input id="rdoAll" type="radio" title="All" value="0" name="ReportType" checked />All Customer &nbsp;&nbsp;
+                        <input id="rdoRetail" title="Retail" type="radio" value="1" name="ReportType" />Retail &nbsp;&nbsp;
+                        <input id="rdoDealer" title="Dealer" type="radio" value="2" name="ReportType" />Dealer &nbsp;&nbsp;
+                        <input id="rdoCredit" title="Credit" type="radio" value="3" name="ReportType" />Credit
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class='col-sm-10 input-group col-sm-offset-2' id='rbReportType'>
+                        <label><input id="rdoOnlyDue" title="Only Due" type="checkbox" value="1" name="DueType" />Only Due</label> 
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2">
+                        <img id="spinningIcon" height="45" width="45" style="display: none;" class="pull-right" src="~/Content/images/Spinner.gif" />
+                    </div>
+                    <div class="col-sm-10">
+                        <input id="btnPreview" type="submit" value="Preview" class="btn btn-sm btn-info" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+

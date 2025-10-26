@@ -1,0 +1,53 @@
+﻿@using IMSWEB
+@model LoginViewModel
+@{
+    ViewBag.Title = "Log In";
+    Layout = null;
+}
+<div class="row">
+
+    @*<div class="col-md-4">
+        @if (Model != null && !string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger" style="font-weight:bold">
+                @Model.ErrorMessage
+            </div>
+        }
+    </div>*@
+    <div class="col-md-12">
+        <div class="" style="font-size: 1.5rem !important;">
+
+            <div class="panel-body">
+                @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="form-group mb-3">
+                        <i class="fa fa-user text-success" aria-hidden="true"></i>&nbsp;
+                        @Html.LabelFor(m => m.UserName, new { @class = "control-label" })
+                        @Html.TextBoxFor(m => m.UserName, new { @class = "form-control input-sm login-input inputFontSize", autofocus = "autofocus" })
+                        @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="form-group mb-3">
+                        <i class="fa fa-key text-success" aria-hidden="true"></i>&nbsp;
+                        @Html.LabelFor(m => m.Password, new { @class = "control-label" })
+                        @Html.PasswordFor(m => m.Password, new { @class = "form-control input-sm login-input" })
+                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="form-group">
+                        @Html.CheckBoxFor(m => m.RememberMe)
+                        @Html.LabelFor(m => m.RememberMe)
+                    </div>
+                    <div class="form-group text-center">
+                        <button style="font-size: 1.5rem !important;" type="submit" class="btn btn-success px-5 text-white mt-3"><i class="fa fa-sign-in pe-2" aria-hidden="true"></i>&nbsp;Log in</button>
+                    </div>
+                    //Enable this once you have account confirmation enabled for password reset functionality
+                    @*<p>
+                        @Html.ActionLink("Forgot your password?", "ForgotPassword")
+                    </p>*@
+                }
+            </div>
+        </div>
+
+    </div>
+</div>

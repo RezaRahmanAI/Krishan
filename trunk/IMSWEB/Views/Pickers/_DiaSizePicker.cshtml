@@ -1,0 +1,100 @@
+﻿@model dynamic
+<div class="input-group">
+    <input type="text" class="input-sm form-control input-sm" id="DiaSizesCode" name="DiaSizesCode" value="@ViewBag.DiaSizesCode" readonly="readonly">
+    <span class="input-group-btn">
+        <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#DiaSizesModal"><i class="fa fa-plus-circle" aria-hidden="true"></i>&nbsp;Pick</button>
+    </span>
+    <input type="text" class="input-sm form-control input-sm" id="DiaSizesName" name="DiaSizesName" value="@ViewBag.DiaSizesName" readonly="readonly">
+    <input type="hidden" class="input-sm form-control input-sm" id="DiaSizesId" name="DiaSizesId" value="@ViewBag.DiaSizesId" readonly="readonly">
+</div>
+
+<!-- Modal -->
+<div class="modal fade bs-example-modal-lg" id="DiaSizesModal" tabindex="-1" role="dialog" aria-labelledby="DiaSizeModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h5 class="modal-title" id="DiaSizeModalLabel">Existing Dia. Sizes</h5>
+            </div>
+            <div class="modal-body">
+                <div id="DiaSizestoolbar">
+                    @Html.ActionLink("Create new", "Create", "DiaSize", routeValues: null, htmlAttributes: new { @class = "btn btn-primary btn-sm", target = "_blank" })
+                    <span class="text-warning">&nbsp;(Requires reload current page to get new item)</span>
+                </div>
+                <table id="DiaSizesTable"
+                       data-toolbar="#DiaSizestoolbar"
+                       data-toggle="table"
+                       data-search="true"
+                       data-click-to-select="true"
+                       data-single-select="true"
+                       data-detail-view="true"
+                       data-pagination="true"
+                       data-id-field="name"
+                       data-page-list="[10, 25, 50, 100, ALL]"
+                       data-page-size="6"
+                       class="table table-responsive table-bordered table-striped" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th data-field="id" class="hidden">
+                            </th>
+                            <th data-checkbox="true">
+                            </th>
+                            <th>
+                                Sl
+                            </th>
+                            <th data-field="code"
+                                data-sortable="true">
+                                Code
+                            </th>
+                            <th data-field="name"
+                                data-sorter="sorter"
+                                data-sortable="true">
+                                Name
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int count = 1;
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="hidden">
+                                        @item.DiaSizeID
+                                    </td>
+                                    <td></td>
+                                    <td>
+                                        @count
+                                    </td>
+                                    <td>
+                                        @item.Code
+                                    </td>
+                                    <td>
+                                        @item.Description
+                                    </td>
+                                </tr>
+                                count++;
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var $table = $('#DiaSizesTable');
+    $table.on('check.bs.table', function (e, row) {
+        $('#DiaSizesCode').val($.trim(row.code));
+        $('#DiaSizesName').val($.trim(row.name));
+        $('#DiaSizesId').val($.trim(row.id));
+    });
+    $table.on('uncheck.bs.table', function (e, row) {
+        $('#DiaSizesCode').val('');
+        $('#DiaSizesName').val('');
+        $('#DiaSizesId').val('');
+    });
+</script>

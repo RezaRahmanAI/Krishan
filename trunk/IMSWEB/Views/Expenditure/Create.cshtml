@@ -1,0 +1,246 @@
+﻿@using IMSWEB.Model
+@model IMSWEB.CreateExpenditureViewModel
+@{
+    string actionName = ViewContext.RouteData.Values["action"].ToString();
+    ViewBag.Title = actionName + " Expenditure";
+}
+<h4 class="inline-header">@(ViewBag.Title + ".")</h4>
+@using (Html.BeginForm(actionName, "Expenditure", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", enctype = "multipart/form-data", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    <div class="col-md-offset-3 col-md-6">
+
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.VoucherNo, htmlAttributes: new { @class = "control-label col-md-3", autofocus = "autofocus" })
+                    <div class="col-md-9">
+                        @Html.EditorFor(model => model.VoucherNo, new { htmlAttributes = new { @class = "form-control input-sm", @readonly = "readonly" } })
+                        @Html.ValidationMessageFor(model => model.VoucherNo, "", new { @class = "text-danger" })
+                        <input type="hidden" value="" id="txtPayType" name="PayType" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.EntryDate, htmlAttributes: new { @class = "control-label col-md-3", autofocus = "autofocus" })
+                    <div class="col-md-9">
+                        @if (User.IsInRole(EnumUserRoles.SalesMan.ToString()))
+                        {
+                            <div class='input-group date' id='EntryDate'>
+                                <input type='text' class="input-sm form-control input-sm" readonly name='EntryDate' />
+                                <span class="input-group-addon">
+                                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class='input-group date' id='EntryDate'>
+                                <input type='text' class="input-sm form-control input-sm" name='EntryDate' />
+                                <span class="input-group-addon">
+                                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        }
+
+                        @Html.ValidationMessageFor(model => model.EntryDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.ExpenseItemID, new { @class = "control-label col-md-4" })
+                            <div class="col-md-8 full-width-picker fix-width-picker">
+                                @Html.DropDownListFor(model => model.ExpenseItemID, new SelectList(ViewBag.ExpenseItemsId, "Id", "Name"), "--Select Expense Item--", new { @class = "form-control input-sm ddl2", @id = "txtExpenseItemsId" })
+                                @Html.ValidationMessageFor(m => m.ExpenseItemID, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2" style="display: none;">
+                        <div class="form-group">
+                            <div class="col-md-10">
+                                @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.ExpenseItemHead, id = (Model != null && Model.ExpenseItemID != null) ? Model.ExpenseItemID : "0" });}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.PayHeadId, htmlAttributes: new { @class = "control-label col-md-3" })
+                    <div class="col-md-9">
+                        @Html.DropDownListFor(model => model.PayHeadId, Model.PayItems, "--Select a Particular--", new { @class = "form-control input-sm ddl2", @id = "PayHeadId" })
+                        @Html.ValidationMessageFor(model => model.PayHeadId, "", new { @class = "text-danger" })
+                        @if (actionName.ToLower().Equals("edit"))
+                        {
+                            @Html.HiddenFor(d => d.PayHeadId)}
+                    </div>
+                </div>
+
+                @*<div class="form-group">
+                        @Html.LabelFor(model => model.ExpenseItemID, new { @class = "control-label col-md-3" })
+                        <div class="col-md-9">
+                            @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.ExpenseItemHead, id = (Model != null && !string.IsNullOrEmpty(Model.ExpenseItemID)) ? Model.ExpenseItemID : "0" });}
+                            @Html.ValidationMessageFor(model => model.ExpenseItemID, "", new { @class = "text-danger" })
+                            @Html.HiddenFor(model => model.ExpenseItemID, new { htmlAttributes = new { @class = "form-control input-sm" } })
+                        </div>
+                    </div>*@
+                @if (ViewBag.IsEmployeeWiseTransEnable)
+                {
+                    <div class="row">
+                        <div class="col-md-10">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.EmployeeID, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8 full-width-picker fix-width-picker">
+                                    @Html.DropDownListFor(model => model.EmployeeID, new SelectList(ViewBag.EmployeeIds, "Id", "Name"), "--Select Employee--", new { @class = "form-control input-sm ddl2", @id = "txtEmployeeId" })
+                                    @Html.ValidationMessageFor(m => m.EmployeeID, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <div class="col-md-10">
+                                    @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Employee, id = (Model != null && Model.EmployeeID != null) ? Model.EmployeeID : "0" });}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @*<div class="form-group">
+                            @Html.LabelFor(m => m.EmployeeID, new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Employee, id = Model != null && Model.EmployeeID.HasValue ? Model.EmployeeID : 0 });}
+                                @Html.ValidationMessageFor(m => m.EmployeeID, "", new { @class = "text-danger" })
+                            </div>
+                        </div>*@
+                }
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Purpose, htmlAttributes: new { @class = "control-label col-md-3" })
+                    <div class="col-md-9">
+                        @Html.EditorFor(model => model.Purpose, new { htmlAttributes = new { @class = "form-control input-sm" } })
+                        @Html.ValidationMessageFor(model => model.Purpose, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Amount, htmlAttributes: new { @class = "control-label col-md-3" })
+                    <div class="col-md-9">
+                        @Html.EditorFor(model => model.Amount, new { htmlAttributes = new { @class = "form-control input-sm text-right", type = "number" } })
+                        @Html.ValidationMessageFor(model => model.Amount, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                @*<div class="form-group">
+                        @Html.LabelFor(model => model.CustomerType, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class=" col-md-8">
+                            @Html.EnumDropDownListFor(model => model.CustomerType, "--Select Customer Type--", new { @class = "form-control input-sm" })
+                            @Html.ValidationMessageFor(model => model.CustomerType, "", new { @class = "text-danger" })
+                        </div>
+                    </div>*@
+                <div class="form-group">
+                    <div class="col-md-offset-3 col-md-9">
+                        <input type="submit" value="Add Expense" class="btn btn-sm btn-primary" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+}
+
+<script>
+    $(function () {
+        //$("#ExpenseItem").select2();
+        $('#EntryDate').datetimepicker({
+            @{
+                if (Model == null || Model.EntryDate == null)
+                {
+                    @:defaultDate: moment(),
+                                        }
+                else
+                {
+                 @:defaultDate: '@(Convert.ToDateTime(Model.EntryDate).ToString("dd-MMM-yyyy"))',
+                                        }
+               @:format: 'DD-MMM-YYYY'
+                                     }
+        });
+
+    });
+
+
+    $('#PayHeadId').change(function () {
+        //var type = $("#PayHeadId").val();
+        //alert(type);
+        getPayType();
+
+    });
+
+    function getPayType() {
+
+        var selectedOption = $('#PayHeadId').find('option:selected').text();
+        var lastHyphenIndex = selectedOption.lastIndexOf('-');
+        var textAfterLastHyphen = selectedOption.slice(lastHyphenIndex + 1);
+        textAfterLastHyphen = $.trim(textAfterLastHyphen);
+        $('#txtPayType').val(textAfterLastHyphen);
+    }
+
+    //******************************************************
+    //           Data populate with new picker
+    //******************************************************
+    $('#txtEmployeeId').change(function () {
+        var empId = getDefaultIntIfEmpty($(this).val());
+        if (empId > 0) {
+            loadEmployeeInfo(empId);
+        }
+    });
+
+    $('#txtExpenseItemsId').change(function () {
+        var expitemId = getDefaultIntIfEmpty($(this).val());
+        if (expitemId > 0) {
+            loadExpenseItemInfo(expitemId);
+        }
+    });
+    function loadEmployeeInfo(employeeId) {
+        $.ajax({
+            url: "/Expenditure/GetEmployeeInfoById",
+            type: "GET",
+            data: { 'employeeId': employeeId },
+            dataType: "json",
+            success: function (employee) {
+                $('#EmployeesCode').val($.trim(employee.Code));
+                $('#EmployeesName').val($.trim(employee.Name));
+                $('#EmployeesId').val($.trim(employee.Id));
+            },
+            error: function (err) {
+                toastr.error(JSON.stringify(err));
+                console.log(JSON.stringify(err))
+            }
+        });
+    }
+
+    function loadExpenseItemInfo(expenseItemId) {
+        $.ajax({
+            url: "/Expenditure/GetExpenseItemInfoById",
+            type: "GET",
+            data: { 'expenseItemId': expenseItemId },
+            dataType: "json",
+            success: function (expensitem) {
+                $('#ExpenseItemsCode').val($.trim(expensitem.Code));
+                $('#ExpenseItemsName').val($.trim(expensitem.Name));
+                $('#ExpenseItemsId').val($.trim(expensitem.Id));
+            },
+            error: function (err) {
+                toastr.error(JSON.stringify(err));
+                console.log(JSON.stringify(err))
+            }
+        });
+    }
+
+    $(document).ready(function(){
+        getPayType();
+    });
+
+
+
+
+</script>

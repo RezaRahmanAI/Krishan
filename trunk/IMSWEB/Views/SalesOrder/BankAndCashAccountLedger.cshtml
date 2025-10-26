@@ -1,0 +1,107 @@
+﻿@using IMSWEB.Model
+@model IMSWEB.CreateSalesOrderViewModel
+
+
+@{
+    ViewBag.Title = "Bank & Cash Account Ledger";
+}
+
+<h4>@(ViewBag.Title + ".")</h4>
+<hr />
+@using (Ajax.BeginForm("BankAndCashAccountLedger", "Report", new { ReturnUrl = ViewBag.ReturnUrl }, ajaxOptions: new AjaxOptions { HttpMethod = "Post", UpdateTargetId = "report", LoadingElementId = "spinningIcon" }, htmlAttributes: new { role = "form" }))
+{
+    <div class="col-sm-12">
+        <div class="row">
+            <input type="hidden" value="" id="txtHeadType" name="HeadType" />
+            <div class="form-group">
+                @Html.LabelFor(model => model.ItemId, htmlAttributes: new { @class = "control-label col-sm-2" })
+                <div class="col-sm-4">
+                    @Html.DropDownListFor(model => model.ItemId, Model.PayHeads, "--Select a Particular--", new { @class = "form-control input-sm ddl2" })
+                    @Html.ValidationMessageFor(model => model.ItemId, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <div class="col-sm-2">
+                    @Html.Label("From Date", htmlAttributes: new { @class = "control-label" })
+                </div>
+                <div class='col-sm-4 input-group date' id='FromDate'>
+                    <input type='text' class="input-sm form-control input-sm" name='FromDate' />
+                    <span class="input-group-addon">
+                        <i class="fa fa-calendar" aria-hidden="true"></i>
+                    </span>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <div class="col-sm-2">
+                    @Html.Label("To Date", htmlAttributes: new { @class = "control-label" })
+                </div>
+                <div class='col-sm-4 input-group date' id='ToDate'>
+                    <input type='text' class="input-sm form-control input-sm" name='ToDate' />
+                    <span class="input-group-addon">
+                        <i class="fa fa-calendar" aria-hidden="true"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <div class="col-sm-4 col-sm-offset-1">
+                    <img id="spinningIcon" height="45" width="45" style="display: none;" class="pull-right" src="~/Content/images/Spinner.gif" />
+                </div>
+                <div class="col-sm-4">
+                    <input id="btnPreview" type="submit" value="Preview" class="btn btn-sm btn-info" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+
+    $(document).ready(function () {
+        @{
+            if (TempData.ContainsKey("errorMsg"))
+            {
+                @:toastr.error("From date can't be earlier than opening date.");
+                @TempData.Remove("errorMsg");
+                @:location.reload();
+            }
+        }
+});
+
+    $('#FromDate').datetimepicker({
+        defaultDate: moment(),
+        format: 'DD-MMM-YYYY'
+    });
+
+    $('#ToDate').datetimepicker({
+        defaultDate: moment(),
+        format: 'DD-MMM-YYYY'
+    });
+
+    $('#ItemId').change(function () {
+        var selectedOption = $(this).find('option:selected').text();
+        var lastHyphenIndex = selectedOption.lastIndexOf('-');
+        var textAfterLastHyphen = selectedOption.slice(lastHyphenIndex + 1);
+        textAfterLastHyphen = $.trim(textAfterLastHyphen);
+        $('#txtHeadType').val(textAfterLastHyphen);
+    });
+
+    $(".ddl2").select2({
+        placeholder: "---Select---",
+        allowClear: true
+    });
+
+</script>

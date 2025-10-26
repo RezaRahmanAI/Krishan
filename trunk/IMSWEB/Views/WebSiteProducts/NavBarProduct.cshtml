@@ -1,0 +1,28 @@
+﻿
+@model IEnumerable<IMSWEB.WebsiteProductViewModels>
+@{
+    Layout = null;
+}
+
+    @if (Model != null && Model.Any())
+    {
+        var randomItems = Model.OrderBy(x => Guid.NewGuid()).Take(4);
+
+        foreach (var item in randomItems)
+        {
+            <div class="col-3 text-center">
+                <div class="card border-0">
+                    <div class="card-body">               
+                      <a  class="mb-3"  href="@Url.Action("GetProductDetails", "WebSiteProducts", new { id = item.Id })">
+                      <img style="width: 200px;" src="@item.DocumentPath" alt=""></a>
+                    </div>
+                    <span class="py-2 px-5 bg-success text-white hvr-up">
+                        <a class="text-white me-3" style="text-decoration: none;" href="#">@item.Title</a>
+                       Tk @item.Price
+
+                    </span>
+                </div>
+            </div>
+        }
+    }
+

@@ -1,0 +1,263 @@
+﻿@model ProductionSetupViewModel
+@using IMSWEB.Model
+@{
+    string actionName = ViewContext.RouteData.Values["action"].ToString();
+    string controllerName = ViewContext.RouteData.Values["controller"].ToString();
+    ViewBag.Title = "Add Production Setup";
+}
+<style>
+    .validation-error {
+        margin: 0;
+        font-size: 10px;
+        display: block;
+    }
+
+    [data-field="0"] {
+        width: 25px !important;
+    }
+    [data-field="1"] {
+        width: 25px !important;
+    }
+    [data-field="RAWProductName"] {
+        width: 270px !important;
+    }
+
+    [data-field="RawParentQuantity"] {
+        width: 70px !important;
+    }
+
+    [data-field="RAWChildQuantity"] {
+        width: 70px !important;
+    }
+
+    [data-field="Quantity"] {
+        width: 70px !important;
+    }
+
+</style>
+<h4>@ViewBag.Title</h4>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        @using (Html.BeginForm("Create", controllerName, new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.PSID);
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="panel">
+                        <div class="panel-body">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.FINProductID, new { @class = "control-label col-md-3 full-width-picker-label" })
+                                <div class="col-md-9 full-width-picker">
+                                    @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.FinGoods, id = (Model != null && Model.FINProductID != null) ? Model.FINProductID : "0" });
+                                    }
+                                    @Html.ValidationMessageFor(m => m.FINProductID, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-offset-4 col-sm-9">
+                                    <input type="submit" value="Add Production Setup" id="btnSave" class="btn btn-sm btn-success" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="panel">
+                        <div class="panel-body">
+                            <table id="DetailsTable"
+                                   data-toggle="table"
+                                   data-search="false"
+                                   data-show-refresh="false"
+                                   data-show-toggle="false"
+                                   data-show-columns="false"
+                                   data-show-export="false"
+                                   data-detail-view="false"
+                                   data-pagination="false"
+                                   data-id-field="customerName"
+                                   data-page-list="[10, 25, 50, 100, ALL]"
+                                   data-page-size="15"
+                                   style="width: 100%"
+                                   class="table table-responsive table-bordered table-striped" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Sl
+                                        </th>
+                                        <th>Select</th>
+                                        <th data-field="RAWProductName"
+                                            data-sortable="true">
+                                            @Html.DisplayNameFor(model => model.Details.FirstOrDefault().RAWProductName)
+                                        </th>
+                                        <th data-field="RawParentQuantity"
+                                            data-sorter="sorter"
+                                            data-sortable="true">
+                                            @Html.DisplayNameFor(model => model.Details.FirstOrDefault().RawParentQuantity)
+                                        </th>
+
+                                        <th data-field="RAWChildQuantity"
+                                            data-sorter="sorter"
+                                            data-sortable="true">
+                                            @Html.DisplayNameFor(model => model.Details.FirstOrDefault().RAWChildQuantity)
+                                        </th>
+                                        <th data-field="Quantity"
+                                            data-sorter="sorter"
+                                            data-sortable="true">
+                                            @Html.DisplayNameFor(model => model.Details.FirstOrDefault().Quantity)
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        int count = 1;
+                                        for (int i = 0; i < Model.Details.Count(); i++)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @count
+                                                </td>
+                                                <td>
+                                                    @Html.CheckBoxFor(modelItem => Model.Details[i].IsSelected)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => Model.Details[i].RAWProductName)
+                                                    @Html.HiddenFor(modelItem => Model.Details[i].PSDID)
+                                                    @Html.HiddenFor(modelItem => Model.Details[i].PSID)
+                                                    @Html.HiddenFor(modelItem => Model.Details[i].RAWProductID)
+                                                    @Html.HiddenFor(modelItem => Model.Details[i].RAWProductName)
+                                                    @Html.HiddenFor(modelItem => Model.Details[i].ConvertValue, new { @class = "txtConvertValue" })
+                                                </td>
+                                                <td>
+                                                    @Html.EditorFor(m => Model.Details[i].RawParentQuantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right prntQty", type = "number"@*, oninput = "calculateRowTotal(this);"*@ } })
+                                                    @Html.ValidationMessageFor(m => Model.Details[i].RawParentQuantity, "", new { @class = "text-danger text-small" })
+                                                </td>
+                                                <td>
+                                                    @Html.EditorFor(m => Model.Details[i].RAWChildQuantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right chlQty", type = "number"@*, oninput = "calculateRowTotal(this);"*@ } })
+                                                </td>
+
+                                                <td>
+                                                    @Html.EditorFor(m => Model.Details[i].Quantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right tQty", type = "number", @readonly = "readonly" } })
+                                                </td>
+                                            </tr>
+                                            count++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        
+    });
+
+
+    //Product Add validation
+    $(document).on('click', '#btnSave', function (e) {
+        var IsValid = true;
+        $(this).find("button[type='submit']").prop('disabled', true);
+
+        var productId = $("#ProductsId").val();
+        if (productId == "" || productId == undefined) {
+            toastr.error("Please select finish goods product first");
+            $("#ProductDetailsCode").focus();
+            $("#ProductDetailsCode").select();
+            IsValid = false;
+            return false
+        }
+
+
+        var $Details = $(document).find('input[name$="IsSelected"]:checked');
+        if (IsValid)
+        {
+            if($Details.length==0)
+            {
+                toastr.error("Please select raw materials.");
+                IsValid = false;
+                e.preventDefault();
+                return false; //break the loop
+            }
+        }
+
+      
+
+        if (IsValid) {
+            if (!$Details) return;
+            $Details.each(function (i, input) {
+              
+                var RawQuantity = parseFloat($(input).parents('tr').find('td:eq(4)').children('input[name$="RawParentQuantity"]').val());
+                if (RawQuantity <= 0) {
+                    var rawInput = $(input).parents('tr').find('td:eq(4)').children('input[name$="RawParentQuantity"]');
+                    $(rawInput).focus();
+                    $(rawInput).select();
+                    toastr.error("Quantity is required.");
+                    IsValid = false;
+                    e.preventDefault();
+                    return false; //break the loop
+                }
+            });
+        }
+
+    });
+
+    function calculateRowTotal(e) {
+        if (timer) {
+            clearTimeout(timer); //cancel the previous timer.
+            timer = null;
+        }
+        timer = setTimeout(function () {
+            CalculateTotalQty(e);
+        }, 1500)
+
+
+    }
+
+
+    //function CalculateTotalQty(e) {
+
+
+    //    var RawParentQuantity = getDefaultFloatIfEmpty($(e).parents('tr').find('td:eq(4)').children('input[id*="__RawParentQuantity"]').val());
+    //    console.log(RawParentQuantity);
+    //    var RawChildQuantity = getDefaultFloatIfEmpty($(e).parents('tr').find('td:eq(5)').children('input[id*="__RawChildQuantity"]').val());
+    //    console.log(RawChildQuantity);
+    //    var ConvertValue = getDefaultFloatIfEmpty($(e).parents('tr').find('td:eq(0)').children('input[id*="__ConvertValue"]').val());
+    //    console.log(ConvertValue);
+    //    var Quantity = getDefaultFloatIfEmpty((1000 * RawParentQuantity) + RawChildQuantity);
+
+
+    //    $(e).parents('tr').find('td:eq(6)').children('input[name$="Quantity"]').val(Quantity);
+
+    //}
+
+
+
+
+    $(document).ready(function () {
+
+        $("input[name$='RawParentQuantity'], input[name$='RAWChildQuantity'], input[name$='ConvertValue']").on("input", function () {
+            // Get the current row
+            var $row = $(this).closest("tr");
+            //debugger;
+            // Find the relevant input elements and values
+            var rawParentQuantity = parseFloat($row.find("input.prntQty").val()) || 0;
+            var rawChildQuantity = parseFloat($row.find("input.chlQty").val()) || 0;
+            var convertValue = parseFloat($row.find("input.txtConvertValue").val());
+ /*           var convertValue = parseFloat($row.find("input[name$='ConvertValue']").val()) || 0;*/
+
+            // Calculate the Quantity
+            var quantity = convertValue * rawParentQuantity   + rawChildQuantity;
+
+            // Update the Quantity input in the same row
+            $row.find("input.tQty").val(quantity);
+        });
+    });
+</script>

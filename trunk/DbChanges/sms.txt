@@ -1,0 +1,32 @@
+
+
+-------------------------------------
+
+BEGIN TRANSACTION
+SET QUOTED_IDENTIFIER ON
+SET ARITHABORT ON
+SET NUMERIC_ROUNDABORT OFF
+SET CONCAT_NULL_YIELDS_NULL ON
+SET ANSI_NULLS ON
+SET ANSI_PADDING ON
+SET ANSI_WARNINGS ON
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.SystemInformations ADD
+	SMSServiceEnable int NOT NULL CONSTRAINT DF_SystemInformations_SMSServiceEnable DEFAULT 0,
+	DaysBeforeSendSMS int NOT NULL CONSTRAINT DF_SystemInformations_DaysBeforeSendSMS DEFAULT 0,
+	SMSProviderID int NOT NULL CONSTRAINT DF_SystemInformations_SMSProviderID DEFAULT 0,
+	SMSSendToOwner int NOT NULL CONSTRAINT DF_SystemInformations_SMSSendToOwner DEFAULT 0,
+	InsuranceContactNo varchar(150) NULL
+GO
+ALTER TABLE dbo.SystemInformations SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+
+
+-------------------------------------------
+update SystemInformations set DaysBeforeSendSMS=1
+-------------------------------------------
+update SystemInformations set SMSServiceEnable=1
+------

@@ -1,0 +1,137 @@
+﻿@using PagedList.Mvc;
+@using PagedList;
+@model IPagedList<IMSWEB.GetProductViewModel>
+@using IMSWEB.Model
+
+@{
+    ViewBag.Title = "Products";
+}
+<h4 class="text-left inline-header">Existing Finish Goods.</h4>
+<hr />
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+        @using (Html.BeginForm("Index", "Product", FormMethod.Post, new { }))
+        {
+            <div class="panel panel-default">
+                <div class="panel-body">
+
+                    <table class="table text-nowrap">
+                        <tr>
+                            <td>
+                                <label>Enter Product Name:</label>
+                            </td>
+                            <td>
+                                <input type='text' class="input-sm form-control input-sm" name='ProductName' placeholder="Enter Product Name" />
+                            </td>
+                            <td>
+                                <img id="spinningIcon" height="45" width="45" style="display: none;" class="pull-right" src="~/Content/images/Spinner.gif" />
+                            </td>
+
+                            <td>
+                                <div class="btn-group">
+                                    <input id="btnPreview" type="submit" value="Search" class="btn btn-sm btn-info mr-2" />
+                                </div>
+                            </td>
+
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+@Html.ActionLink("Create new product", "Create", routeValues: null, htmlAttributes: new { @class = "btn btn-primary btn-sm pull-right", id = "toolbar" })
+
+<table id="productTable"
+       data-toggle="table"
+       data-search="true"
+       data-show-refresh="true"
+       data-show-toggle="true"
+       data-show-columns="true"
+       data-show-export="true"
+       data-detail-view="true"
+       data-pagination="true"
+       data-id-field="productName"
+       data-page-list="[10, 25, 50, 100, ALL]"
+       data-page-size="10"
+       data-toolbar="#toolbar"
+       class="table table-responsive table-bordered table-striped" cellspacing="0" width="100%">
+    <thead>
+        <tr>
+            <th>
+                Sl
+            </th>
+            <th data-field="code"
+                data-sortable="true">
+                @Html.DisplayNameFor(model => model.First().ProductCode)
+            </th>
+            <th data-field="productName"
+                data-sorter="sorter"
+                data-sortable="true">
+                @Html.DisplayNameFor(model => model.First().ProductName)
+            </th>
+            <th data-field="categoryName"
+                data-sortable="true">
+                @Html.DisplayNameFor(model => model.First().CategoryName)
+            </th>
+            <th data-field="companyName"
+                data-sortable="true">
+                @Html.DisplayNameFor(model => model.First().CompanyName)
+            </th>
+            <th data-field="SizeName"
+                data-sortable="true">
+                @Html.DisplayNameFor(model => model.First().SizeName)
+            </th>
+            <th data-field="DP"
+                data-sortable="true">
+                @Html.DisplayNameFor(model => model.First().DP)
+            </th>
+            <th data-field="MRP"
+                data-sortable="true">
+                @Html.DisplayNameFor(model => model.First().MRPRate)
+            </th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            int count = 1;
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @count
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ProductCode)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ProductName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CategoryName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CompanyName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.SizeName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.DP)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.MRPRate)
+                    </td>
+                    <td>
+                        @Html.ActionLink("Edit", "Edit", new { id = item.ProductId }) |
+                        @Html.ActionLink("Delete", "Delete", new { id = item.ProductId }, new { onclick = "if(!confirm('Do you want to delete this product?')) return false;" })
+                    </td>
+                </tr>
+                count++;
+            }
+        }
+    </tbody>
+</table>
+@Html.PagedListPager(Model, page => Url.Action("Index", new { page }), new PagedListRenderOptions() { Display = PagedListDisplayMode.IfNeeded, DisplayItemSliceAndTotal = true })
+

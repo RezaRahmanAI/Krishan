@@ -1,0 +1,74 @@
+﻿@model EmployeeTargetSetupViewModel
+@using IMSWEB.Model
+@{
+    ViewBag.Title = "Employee Target Setup";
+    string actionName = ViewContext.RouteData.Values["action"].ToString();
+    string controllerName = ViewContext.RouteData.Values["controller"].ToString();
+}
+
+    <h4>Employee Target Setup</h4>
+<hr />
+
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                @using (Html.BeginForm(actionName, controllerName, new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "myform" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(model => model.ETSID)
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.EmployeeID, new { @class = "control-label col-md-3" })
+                        <div class="col-md-9">
+                            @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Employee, id = (Model != null && Model.EmployeeID != null && Model.EmployeeID != null) ? Model.EmployeeID : 0 });}
+                            @Html.ValidationMessageFor(model => model.EmployeeID, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.TargetAmt, new { @class = "control-label col-md-3" })
+                        <div class="col-md-9">
+                            @Html.EditorFor(model => model.TargetAmt, new { htmlAttributes = new { @class = "form-control input-sm  text-right", type = "number" } })
+                            @Html.ValidationMessageFor(model => model.TargetAmt, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.TargetMonth, new { @class = "control-label col-md-3" })
+                        <div class="col-md-9">
+                            <div class='input-group date' id='TargetMonth'>
+                                <input type='text' class="input-sm form-control input-sm" name='TargetMonth' />
+                                <span class="input-group-addon">
+                                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.TargetMonth, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-3 col-md-9">
+                            <input type="submit" value="Create" class="btn btn-primary btn-sm" />
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $('#TargetMonth').datetimepicker({
+        @{
+         if (Model == null || Model.TargetMonth == DateTime.MinValue)
+     {
+         @:defaultDate: moment(),
+                 }
+         else
+         {
+         @:defaultDate: '@Model.TargetMonth.ToString("MMM-yyyy")',
+                 }
+         @:format: 'MMM-YYYY'
+            }
+    });
+</script>

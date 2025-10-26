@@ -1,0 +1,118 @@
+﻿@model IEnumerable< ProductUnitTypeViewModel>
+@{
+    ViewBag.Title = "Product Units";
+}
+<h4 class="text-left inline-header">Existing @ViewBag.Title</h4>
+@Html.ActionLink("Create new Unit", "Create", "ProductUnit", routeValues: null, htmlAttributes: new { @class = "btn btn-primary btn-sm pull-right",id="toolbar" })
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <table id="cashcollectionTable"
+                       data-toggle="table"
+                       data-search="true"
+                       data-show-refresh="true"
+                       data-show-toggle="true"
+                       data-show-columns="true"
+                       data-show-export="true"
+                       data-detail-view="true"
+                       data-pagination="true"
+                       data-id-field="name"
+                       data-page-list="[10, 25, 50, 100, ALL]"
+                       data-page-size="10"
+                       data-toolbar="#toolbar"
+                       class="table table-responsive table-bordered table-striped" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th>
+                                Sl
+                            </th>
+                            <th data-field="Description"
+                                data-sorter="sorter"
+                                data-sortable="true">
+                                @Html.DisplayNameFor(model => model.Description)
+                            </th>
+                            <th data-field="ConvertValue"
+                                data-sortable="true">
+                                @Html.DisplayNameFor(model => model.ConvertValue)
+                            </th>
+                            <th data-field="UnitName"
+                                data-sortable="true">
+                                @Html.DisplayNameFor(model => model.UnitName)
+                            </th>
+                            <th data-field="Position"
+                                data-sortable="true">
+                                @Html.DisplayNameFor(model => model.Position)
+                            </th>
+                            <th data-field="Status"
+                                data-sortable="true">
+                                @Html.DisplayNameFor(model => model.Status)
+                            </th>
+                            <th>
+                                Action
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int count = 1;
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        @count
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Description)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.ConvertValue)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.UnitName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Position)
+                                    </td>
+                                    <td>
+                                        @if (item.Status == 1)
+                                        {
+                                            <span class="label label-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="label label-danger">
+                                                Inactive
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.Status == 1)
+                                        {
+                                            @Html.ActionLink("Inactive", "Inactive", new { id = item.ProUnitTypeID })
+                                            <span>|</span>
+                                        }
+                                        else
+                                        {
+                                            @Html.ActionLink("Active", "Active", new { id = item.ProUnitTypeID })
+                                            <span>|</span>
+                                        }
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            @Html.ActionLink("Edit", "Edit", new { id = item.ProUnitTypeID })
+                                            <span>|</span>
+                                            @Html.ActionLink("Delete", "Delete", new { id = item.ProUnitTypeID }, new { onclick = "if(!confirm('Do you want to delete this?')) return false;" })
+                                        }
+                                    </td>
+                                </tr>
+                                        count++;
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+

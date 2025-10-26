@@ -1,0 +1,1426 @@
+﻿﻿
+<style>
+    .col-md-4 {
+        padding-right: 0px !important;
+    }
+
+    .col-md-8 {
+        padding-left: 0px !important;
+    }
+
+    .fix-width-picker {
+        padding-left: 17px !important;
+    }
+</style>
+@using IMSWEB.Model
+@model PurchaseOrderViewModel
+
+@{
+    string actionName = ViewContext.RouteData.Values["action"].ToString();
+    ViewBag.Title = actionName + " Purchase Order";
+}
+<h4 class="inline-header">@(ViewBag.Title + ".")</h4>
+<hr />
+@using (Html.BeginForm(actionName, "PurchaseOrder", new { ReturnUrl = ViewBag.ReturnUrl, IsDO = false }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.PODetail.GodownID);
+    @Html.HiddenFor(m => m.PODetail.ColorId);
+    @Html.HiddenFor(m => m.PODetail.PPOffer);
+    @Html.HiddenFor(m => m.PurchaseOrder.IsDamagePO)
+    <input type="hidden" value="" id="txtItemType" name="ItemType" />
+
+    @*@Html.HiddenFor(m => m.PODetail.SizeName);*@
+    @*@Html.Hidden("PrevQuantity", Model.PODetail != null ? !string.IsNullOrEmpty(Model.PODetail.Quantity) ? Model.PODetail.Quantity : string.Empty : string.Empty)*@
+    <div class="row">
+        <div class="col-md-6">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PurchaseOrder.ChallanNo, new { @class = "control-label col-md-4" })
+                                                <div class="col-md-8">
+                                                    @Html.EditorFor(m => m.PurchaseOrder.ChallanNo, new { htmlAttributes = new { @class = "input-sm form-control input-sm" } })
+                                                    @Html.ValidationMessageFor(m => m.PurchaseOrder.ChallanNo, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PurchaseOrder.OrderDate, new { @class = "control-label col-md-4" })
+                                                <div class="col-md-8">
+                                                    <div class='input-group date' id='OrderDate'>
+                                                        <input type='text' class="input-sm form-control input-sm" name='OrderDate' />
+                                                        <span class="input-group-addon">
+                                                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                @Html.ValidationMessageFor(m => m.PurchaseOrder.OrderDate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @*<div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    @Html.LabelFor(m => m.PurchaseOrder.SupplierId, new { @class = "control-label col-md-2  full-width-picker-label" })
+                                                    <div class="col-md-10 full-width-picker">
+                                                        @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Supplier, id = (Model != null && !string.IsNullOrEmpty(Model.PurchaseOrder.SupplierId)) ? Model.PurchaseOrder.SupplierId : "0" });}
+                                                        @Html.ValidationMessageFor(m => m.PurchaseOrder.SupplierId, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>*@
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PurchaseOrder.SupplierId, new { @class = "control-label col-md-2" })
+                                                <div class="col-md-10 full-width-picker">
+                                                    @Html.DropDownListFor(model => model.PurchaseOrder.SupplierId, new SelectList(ViewBag.SupplierIds, "Id", "Name"), "--Select Supplier--", new { @class = "form-control input-sm ddl2", @id = "txtSupplierId" })
+                                                    @Html.ValidationMessageFor(m => m.PurchaseOrder.SupplierId, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group" style="display: none;">
+                                                <div class="col-md-10">
+                                                    @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Supplier, id = (Model != null && Model.PurchaseOrder.SupplierId != null) ? Model.PurchaseOrder.SupplierId : "0" });}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.PODetail.ProductId, new { @class = "control-label col-md-2" })
+                                        <div class="col-md-10 full-width-picker">
+                                            @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Product, id = (Model != null && !string.IsNullOrEmpty(Model.PODetail.ProductId)) ? Model.PODetail.ProductId : "0" });}
+                                            @Html.ValidationMessageFor(m => m.PODetail.ProductId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @*<div class="col-md-10">
+                                        <div class="form-group">
+                                            @Html.LabelFor(m => m.PODetail.ProductId, new { @class = "control-label col-md-2" })
+                                            <div class="col-md-10 full-width-picker fix-width-picker">
+                                                @Html.DropDownListFor(model => model.PODetail.ProductId, new SelectList(ViewBag.ProductIds, "Id", "Name"), "--Select Agent--", new { @class = "form-control input-sm ddl2", @id = "txtProductId" })
+                                                @Html.ValidationMessageFor(m => m.PODetail.ProductId, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Product, id = (Model != null && Model.PODetail.ProductId != null) ? Model.PODetail.ProductId : "0" });}
+                                            </div>
+                                        </div>
+                                    </div>*@
+                                <div class="col-md-6">
+
+                                    @*<div class="form-group">
+                                            @Html.LabelFor(m => m.PODetail.GodownID, new { @class = "control-label col-md-4" })
+                                            <div class="col-md-8">
+                                                @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Godown, id = (Model != null && !string.IsNullOrEmpty(Model.PODetail.GodownID)) ? Model.PODetail.GodownID : "0" });}
+                                                @Html.ValidationMessageFor(m => m.PODetail.GodownID, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>*@
+
+                                    <div class="form-group" style="display:none">
+                                        @Html.LabelFor(m => m.PODetail.PreviousStock, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.PODetail.PreviousStock, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.PODetail.PreviousStock, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="display:none">
+                                        @Html.LabelFor(m => m.PODetail.UnitPrice, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.PODetail.UnitPrice, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.PODetail.UnitPrice, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="display:none" id="RatePerAreadiv">
+                                        @Html.LabelFor(m => m.PODetail.RatePerArea, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.PODetail.RatePerArea, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 2 } })
+                                            @Html.ValidationMessageFor(m => m.PODetail.RatePerArea, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.PODetail.ParentQuantity, new { @class = "control-label col-md-4", id = "lblParentUnit" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.PODetail.ParentQuantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", tabindex = 1 } })
+                                            @Html.ValidationMessageFor(m => m.PODetail.ParentQuantity, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.PODetail.MRPRateParent, new { @class = "control-label col-md-4", id = "lblMRPParent" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.PODetail.MRPRateParent, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 2 } })
+                                            @Html.ValidationMessageFor(m => m.PODetail.MRPRateParent, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="form-group" style="display:none">
+                                        @Html.LabelFor(m => m.PODetail.PPDisPercentage, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.PODetail.PPDisPercentage, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 3 } })
+                                            @Html.ValidationMessageFor(m => m.PODetail.PPDisPercentage, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="display:none">
+                                        @Html.LabelFor(m => m.PODetail.PPDiscountAmount, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.PODetail.PPDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = -4 } })
+                                            @Html.ValidationMessageFor(m => m.PODetail.PPDiscountAmount, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    @*<div class="form-group">
+                                            @Html.LabelFor(m => m.PODetail.ExtraPPDISPer, new { @class = "control-label col-md-4" })
+                                            <div class="col-md-8">
+                                                @Html.EditorFor(m => m.PODetail.ExtraPPDISPer, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 4 } })
+                                                @Html.ValidationMessageFor(m => m.PODetail.ExtraPPDISPer, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>*@
+
+                                    <div class="form-group" style="display:none">
+                                        @Html.LabelFor(m => m.PODetail.SalesRate, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.PODetail.SalesRate, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 6 } })
+                                            @Html.ValidationMessageFor(m => m.PODetail.SalesRate, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    @*<div class="form-group">
+                                            @Html.LabelFor(m => m.PODetail.CreditSalesRate, new { @class = "control-label col-md-4" })
+                                            <div class="col-md-8">
+                                                @Html.EditorFor(m => m.PODetail.CreditSalesRate, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 8 } })
+                                                @Html.ValidationMessageFor(m => m.PODetail.CreditSalesRate, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>*@
+                                    <div class="form-group" style="display:none" id="AreaPerCartondiv">
+                                        @Html.LabelFor(m => m.PODetail.AreaPerCarton, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.PODetail.AreaPerCarton, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 7, @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.PODetail.AreaPerCarton, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    @*<div class="form-group">
+                                            @Html.LabelFor(m => m.PODetail.ColorId, new { @class = "control-label col-md-4" })
+                                            <div class="col-md-8">
+                                                @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.Color, id = (Model != null && !string.IsNullOrEmpty(Model.PODetail.ColorId)) ? Model.PODetail.ColorId : "0" });}
+                                                @Html.ValidationMessageFor(m => m.PODetail.ColorId, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>*@
+                                    <div class="form-group" style="display:none">
+                                        @Html.LabelFor(m => m.PODetail.ConvertValue, new { @class = "control-label col-md-4", id = "lblConvertValue" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.PODetail.ConvertValue, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", tabindex = 1, @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.PODetail.ConvertValue, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="display:none">
+                                        @Html.LabelFor(m => m.PODetail.SizeName, new { @class = "control-label col-md-4", id = "lblSize" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.PODetail.SizeName, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "text", tabindex = 1, @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.PODetail.SizeName, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group" id="divChildQuantity">
+                                        @Html.LabelFor(m => m.PODetail.ChildQuantity, new { @class = "control-label col-md-4", id = "lblChildUnit" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.PODetail.ChildQuantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", tabindex = 1 } })
+                                            @Html.ValidationMessageFor(m => m.PODetail.ChildQuantity, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" style="display:none">
+                                        @Html.LabelFor(m => m.PODetail.MRPRate, new { @class = "control-label col-md-4", id = "lblMRP" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.PODetail.MRPRate, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 2 } })
+                                            @Html.ValidationMessageFor(m => m.PODetail.MRPRate, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.PODetail.Quantity, new { @class = "control-label col-md-4", id = "lblChildUnit" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.PODetail.Quantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", tabindex = 1, @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.PODetail.Quantity, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+
+                                    @*<div class="form-group">
+                                            @Html.LabelFor(m => m.PODetail.ExtraPPDISAmt, new { @class = "control-label col-md-4" })
+                                            <div class="col-md-8">
+                                                @Html.EditorFor(m => m.PODetail.ExtraPPDISAmt, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = -6 } })
+                                                @Html.ValidationMessageFor(m => m.PODetail.ExtraPPDISAmt, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>*@
+                                    @*<div class="form-group">
+                                            @Html.LabelFor(m => m.PODetail.CRSalesRate3Month, new { @class = "control-label col-md-4" })
+                                            <div class="col-md-8">
+                                                @Html.EditorFor(m => m.PODetail.CRSalesRate3Month, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 7 } })
+                                                @Html.ValidationMessageFor(m => m.PODetail.CRSalesRate3Month, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            @Html.LabelFor(m => m.PODetail.CRSalesRate12Month, new { @class = "control-label col-md-4" })
+                                            <div class="col-md-8">
+                                                @Html.EditorFor(m => m.PODetail.CRSalesRate12Month, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 9 } })
+                                                @Html.ValidationMessageFor(m => m.PODetail.CRSalesRate12Month, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>*@
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.PODetail.TAmount, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.PODetail.TAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.PODetail.TAmount, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="display:none" id="TotalAreadiv">
+                                        @Html.LabelFor(m => m.PODetail.TotalArea, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.PODetail.TotalArea, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.PODetail.TotalArea, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="pull-right">
+                                <input type="submit" class="btn btn-sm btn-primary" name="addButton" value="Add to order" />
+                                <button type="reset" class="btn btn-sm btn-danger">Clear</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+        <div class="col-md-6">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.PurchaseOrder.CurrentDue, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.PurchaseOrder.CurrentDue, new { htmlAttributes = new { @class = "input-sm form-control text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.PurchaseOrder.CurrentDue, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.PurchaseOrder.GrandTotal, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.PurchaseOrder.GrandTotal, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.PurchaseOrder.TotalAmount, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="display: none;"> 
+                                        @Html.LabelFor(m => m.PurchaseOrder.PPDiscountAmount, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.PurchaseOrder.PPDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.PurchaseOrder.PPDiscountAmount, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <table id="productTable"
+                                   data-toggle="table"
+                                   data-height="255"
+                                   class="table table-responsive table-bordered table-striped text-nowrap" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Sl
+                                        </th>
+                                        <th data-field="name"
+                                            data-sortable="true">
+                                            @Html.DisplayNameFor(model => model.PODetail.ProductName)
+                                        </th>
+                                        @*<th data-field="color"
+                                                data-sortable="true">
+                                                @Html.DisplayNameFor(model => model.PODetail.ColorName)
+                                            </th>*@
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.PODetail.Quantity)
+                                        </th>
+                                        @*<th>
+                                                @Html.DisplayNameFor(model => model.PODetail.MRPRate)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.PODetail.PPDisPercentage)
+                                            </th>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.PODetail.PPDiscountAmount)
+                                            </th>*@
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.PODetail.UnitPrice)
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.PODetail.TAmount)
+                                        </th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        int c = 1;
+                                        decimal MRP = 0;
+                                        decimal Qty = 0;
+                                        decimal DisAmt = 0;
+                                        decimal UnitPrice = 0;
+
+
+                                        foreach (var item in Model.PODetails)
+                                        {
+                                            MRP = Math.Round((Convert.ToDecimal(@item.MRPRate) * Convert.ToDecimal(@item.ConvertValue)), 4);
+                                            Qty = Math.Round((Convert.ToDecimal(@item.Quantity) / Convert.ToDecimal(@item.ConvertValue)), 4);
+                                            DisAmt = Math.Round((Convert.ToDecimal(@item.PPDiscountAmount) * Convert.ToDecimal(@item.ConvertValue)), 4);
+                                            UnitPrice = Math.Round((Convert.ToDecimal(@item.UnitPrice) * Convert.ToDecimal(@item.ConvertValue)), 4);
+
+                                            if (item.Status == EnumStatus.Updated || item.Status == EnumStatus.Deleted) { continue; }
+                                            <tr>
+                                                <td>
+                                                    @c
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.ProductName)
+                                                </td>
+                                                @*<td>
+                                                            @Html.DisplayFor(modelItem => item.ColorName)
+                                                    </td>*@
+                                                <td>
+                                                    @Qty
+                                                </td>
+                                                @*<td>
+                                                        @MRP
+
+                                                    </td>
+                                                    <td>
+                                                        @Html.DisplayFor(modelItem => item.PPDisPercentage)
+                                                    </td>
+                                                    <td>
+                                                        @DisAmt
+                                                    </td>*@
+                                                <td>
+                                                    @UnitPrice
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.TAmount)
+                                                </td>
+                                                @*<td>
+                                                    @Html.ActionLink("Edit", "EditFromView", new { id = item.ProductId, cid = item.ColorId, previousAction = actionName.ToLower(), IsDO = false }, new { @class = "btn btn-xs btn-info" })
+                                                </td>*@
+                                                <td>
+                                                    @Html.ActionLink("Delete", "DeleteFromView", new { id = item.ProductId, cid = item.ColorId, previousAction = actionName.ToLower(), IsDO = false }, new { onclick = "if(!confirm('Do you want to delete this item?')) return false;" })
+                                                </td>
+                                            </tr>
+                                            c++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" style="display:none">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <table id="productIdentifierTable"
+                                   data-toggle="table"
+                                   data-height="255"
+                                   class="table table-responsive table-bordered table-striped text-nowrap" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Sl
+                                        </th>
+                                        <th data-field="code">
+                                            Name
+                                        </th>
+                                        <th data-field="iemi">
+                                            IMEI /Barcode
+                                        </th>
+                                        <th data-field="DIMENO">
+                                            Damage IMEI /Barcode
+                                        </th>
+                                        <th>
+                                            Select
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        int i = 1;
+                                        if (TempData["POProductDetails"] != null)
+                                        {
+                                            foreach (var item in (List<POProductDetail>)TempData["POProductDetails"])
+                                            {
+                                                <tr>
+                                                    <td width="5%">@i</td>
+                                                    <td width="26.84%">@Model.PODetail.ProductName</td>
+                                                    <td width="30%">
+                                                        <input type="text" class="form-control input-sm input-sm" value="@item.IMENO" name="@("IMEINo" +  i.ToString())" />
+                                                    </td>
+                                                    <td width="50%">
+                                                        <input type="text" class="form-control input-sm input-sm" value="@item.DIMENO" name="@("DIMEINo" +  i.ToString())" id="@("DIMEINo" +  i.ToString())" readonly />
+                                                    </td>
+                                                    <td>
+                                                        @if (Model.PurchaseOrder.IsDamagePO)
+                                                        {
+                                                            <button type="button" id=@i class="btn btn-xs btn-info btnGetDamageProduct" title="Get Damage Product"><i class="fa fa-info-circle"></i></button>
+                                                        }
+                                                        else
+                                                        {
+                                                            <button type="button" id=@i class="btn btn-xs btn-info btnGetDamageProduct" title="Get Damage Product" disabled><i class="fa fa-info-circle"></i></button>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                                i++;
+                                            }
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.PurchaseOrder.TotalDiscountPercentage, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.PurchaseOrder.TotalDiscountPercentage, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                    @Html.ValidationMessageFor(m => m.PurchaseOrder.TotalDiscountPercentage, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.PurchaseOrder.NetDiscount, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.HiddenFor(m => m.PurchaseOrder.tempNetDiscount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.EditorFor(m => m.PurchaseOrder.NetDiscount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.PurchaseOrder.NetDiscount, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.PurchaseOrder.Remarks, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.PurchaseOrder.Remarks, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "text", step = "0.01" } })
+                                    @Html.ValidationMessageFor(m => m.PurchaseOrder.Remarks, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.PurchaseOrder.TotalDiscountAmount, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+
+                                    @Html.HiddenFor(m => m.PurchaseOrder.tempFlatDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                    @Html.EditorFor(m => m.PurchaseOrder.TotalDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                    @Html.ValidationMessageFor(m => m.PurchaseOrder.TotalDiscountAmount, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.PurchaseOrder.LabourCost, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.PurchaseOrder.LabourCost, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                    @Html.ValidationMessageFor(m => m.PurchaseOrder.LabourCost, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.PurchaseOrder.AdjAmount, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.PurchaseOrder.AdjAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                    @Html.ValidationMessageFor(m => m.PurchaseOrder.AdjAmount, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.PurchaseOrder.TotalAmount, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.PurchaseOrder.TotalAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.PurchaseOrder.TotalAmount, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.PurchaseOrder.ItemId, htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.DropDownListFor(model => model.PurchaseOrder.ItemId, Model.PurchaseOrder.PayItems, "--Select a Payment--", new { @class = "form-control input-sm ddl2", @id = "ItemId" })
+                                    @Html.ValidationMessageFor(model => model.PurchaseOrder.ItemId, "", new { @class = "text-danger" })
+
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.PurchaseOrder.RecieveAmount, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.PurchaseOrder.RecieveAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                    @Html.ValidationMessageFor(m => m.PurchaseOrder.RecieveAmount, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.PurchaseOrder.PaymentDue, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.PurchaseOrder.PaymentDue, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.PurchaseOrder.PaymentDue, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-offset-4 col-md-8">
+                                    @*<button type="button" class="btn btn-sm btn-info pull-right">Preview</button>*@
+                                    <input type="submit" class="btn btn-sm btn-primary pull-right" name="submitButton" value="Save order" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<div class="modal fade bs-example-modal-lg" id="DamageProductDetailsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h5 class="modal-title" id="myModalLabel">Damage Return ProductDetails</h5>
+            </div>
+            <div class="modal-body">
+                <div id="ProductDetailstoolbar">
+                    @*@Html.ActionLink("Create new", "Create", "Product", routeValues: null, htmlAttributes: new { @class = "btn btn-primary btn-sm", target = "_blank" })*@
+                    <span class="text-warning">&nbsp;(Requires reload current page to get new item)</span>
+                </div>
+                <div class="table-responsive" style="max-height:200px">
+                    <table id="DamageProductDetailsTable"
+                           data-toggle="table"
+                           data-search="true"
+                           data-click-to-select="true"
+                           data-single-select="true"
+                           data-detail-view="true"
+                           data-pagination="true"
+                           data-id-field="name"
+                           data-page-list="[10, 25, 50, 100, ALL]"
+                           data-page-size="6"
+                           class="table table-responsive table-bordered table-striped" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                @*<th data-field="id" class="hidden">
+                                    </th>*@
+
+                                <th>
+                                    Sl
+                                </th>
+                                <th data-field="code"
+                                    data-sortable="true">
+                                    Code
+                                </th>
+                                <th data-field="name"
+                                    data-sorter="sorter"
+                                    data-sortable="true">
+                                    Name
+                                </th>
+                                <th data-field="category"
+                                    data-sorter="sorter"
+                                    data-sortable="true">
+                                    Category
+                                </th>
+                                @*<th data-field="detailId" class="hidden">
+                                    </th>
+                                    <th data-field="colorId" class="hidden">
+                                    </th>*@
+                                <th data-field="imeNo"
+                                    data-sorter="sorter"
+                                    data-sortable="true">
+                                    Company
+                                </th>
+                                <th data-field="colorname"
+                                    data-sorter="sorter"
+                                    data-sortable="true">
+                                    Color
+                                </th>
+                                <th data-field="mrpRate"
+                                    data-sorter="sorter"
+                                    data-sortable="true">
+                                    IMEI
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $(window).keydown(function (event) {
+            if (event.keyCode == 10 || event.keyCode == 13) {
+                event.preventDefault();
+                return false;
+            }
+        });
+    });
+
+    $('#OrderDate').datetimepicker({
+        @{
+                if (Model == null || Model.PurchaseOrder.OrderDate == null) {
+                    @:defaultDate: moment(),
+                                                                                                                                            }
+                else
+                {
+            @:defaultDate: '@(Convert.ToDateTime(Model.PurchaseOrder.OrderDate).ToString("dd-MMM-yyyy"))',
+                                                                                                                                    }
+            @:format: 'DD-MMM-YYYY'
+                                                                                                                                            }
+    });
+
+    $('#ItemId').change(function () {
+        getItemType();
+    });
+
+    function getItemType() {
+        var selectedOption = $('#ItemId').find('option:selected').text();
+        var lastHyphenIndex = selectedOption.lastIndexOf('-');
+        var textAfterLastHyphen = selectedOption.slice(lastHyphenIndex + 1);
+        textAfterLastHyphen = $.trim(textAfterLastHyphen);
+        $('#txtItemType').val(textAfterLastHyphen);
+    }
+
+    $(document).ready(function () {
+        getItemType();
+    });
+
+    //************************************************************
+    //Get Damage return products for picker
+    //************************************************************
+
+    $('#ProductsModal').on('hidden.bs.modal', function () {
+        $("#PODetail_Quantity").trigger("input");
+    });
+
+    //$('#ColorsModal').on('hidden.bs.modal', function () {
+    //    GetDamageReturnIMEI();
+    //});
+
+    var _DIMEINo = "";
+    $(document).on("click", ".btnGetDamageProduct", function () {
+
+        //alert(this.id)
+        _DIMEINo = "#DIMEINo" + this.id;
+        GetDamageReturnIMEI();
+        $('#DamageProductDetailsModal').modal('toggle');
+
+    });
+
+    function GetDamageReturnIMEI() {
+        var ProducctID = $("#ProductsId").val();
+        if (ProducctID == "" || ProducctID == un) {
+            toastr.info("Please Select Product.")
+            return;
+        }
+        //var ColorID = $("#ColorsId").val();
+        var ColorID = $("#PODetail_ColorId").val();
+        if (ColorID == "" || ColorID == undefined) {
+            toastr.info("Please Select Color.")
+            return;
+        }
+        $.ajax({
+            url: "/PurchaseOrder/GetDamageReturnIMEI",
+            type: "GET",
+            data: { "ProductID": ProducctID, "ColorID": ColorID },
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                if (data.Status == true) {
+                    PopulateDamageProductDetailsTable(data);
+                }
+
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        })
+    }
+
+    //Generate damage product picker
+    function PopulateDamageProductDetailsTable(data) {
+
+        var $table = $("#DamageProductDetailsTable >tbody");
+        $table.empty();
+        var counter = 1;
+        data.Data.forEach(function (item) {
+            var $row = $('<tr/>');
+            $row.append('<td><input type="checkbox" class="chkbxProduct" name="chkbxProduct" id="chkbxProduct" value="' + item.IMENO + '"/></td><td>' + counter + '</td><td>' + item.ProductCode + '</td><td>' + item.ProductName + '</td><td>' + item.CategoryName + '</td><td>' + item.CompanyName + '</td><td>' + item.ColorName + '</td><td>' + item.IMENO + '</td>');
+            $table.append($row);
+            counter++;
+        });
+    }
+
+
+    //damage picker product select event
+    $(document).on('change', 'input.chkbxProduct', function () {
+        $('input.chkbxProduct').not(this).prop('checked', false);
+        SelectProductDetails(this.value);
+        checkDuplicateDIMEINo();
+        $('#DamageProductDetailsModal').modal('toggle');
+    });
+
+
+    //for damage Product
+    function SelectProductDetails(IMENo) {
+        //alert(ProductId);
+        if (IMENo == "") {
+            ClearDamageProductDetails();
+            return;
+        }
+        $(_DIMEINo).val(IMENo);
+
+
+    }
+
+    function ClearDamageProductDetails() {
+        $(DIMEINo).val("");
+    }
+
+
+    //************************************************************
+    //End generate Damage Picker
+    //************************************************************
+
+
+    $("#PurchaseOrder_IsDamagePO").on("change", function () {
+        if (this.checked) {
+            $(".btnGetDamageProduct").prop("disabled", false);
+        }
+        else {
+            $(".btnGetDamageProduct").prop("disabled", true);
+        }
+    });
+
+    $("#PODetail_Quantity").on("input", function () {
+        var purchaseRate = $("#PODetail_UnitPrice").val();
+        var TAmount = (parseInt($(this).val()) * parseFloat(purchaseRate)).toFixed(4);
+        $("#PODetail_TAmount").val(TAmount);
+
+        var productName = $('#ProductsName').val();
+        if (productName == '') {
+            toastr['error']('Please pick a product first.');
+            return;
+        }
+
+        var ProductType = $('#ProductsType').val();
+        var Quantity = $("#PODetail_Quantity").val();
+        $("#productIdentifierTable > tbody > tr.no-records-found").html('');
+        if (ProductType == "1" || ProductType == "3")//barcode=1, Autobarcode=3
+            createProductIdentifierTableRows(Quantity);
+        else if (ProductType == "2") //NoBarcode
+        {
+            createProductIdentifierTableRows(1);
+            $("#IMEINo1").val("No Barcode");
+            //$("#IMEINo1").attr("disabled",true);
+        }
+
+        //var newRow = $("<tr>");
+        //var cols = "";
+
+        //for (var counter = 1; counter <= $(this).val(); counter++) {
+        //    newRow = $("<tr>");
+        //    cols = "";
+        //    cols += '<td width="9.97%">' + counter + '</td>';
+        //    cols += '<td width="26.84%">' + productName + '</td>';
+        //    cols += '<td width="63.18%"><input type="text" class="form-control input-sm input-sm" name="IMEINo' + counter + '"/></td>';
+        //    newRow.append(cols);
+        //    $("#productIdentifierTable").append(newRow);
+        //}
+    });
+
+    function createProductIdentifierTableRows(quantity) {
+
+        var counterLimit = parseInt(quantity);
+        var preCount = 0;
+        var productName = $('#ProductsName').val();
+        var newRow = '';
+        var cols = '';
+        var ProductType = parseInt($('#ProductsType').val());
+
+        $("#productIdentifierTable tr").each(function (count, row) {
+            var $row = $(row);
+            if (!$row) return;
+            var $inputs = $row.find('input[name^="IMEINo"]');
+            if (!$inputs) return;
+            //For Nobarcode and Existing barcode don't remove imei
+            if (ProductType == 1 || ProductType == 2) {
+                $inputs.each(function (count, input) {
+                    var val = $(input).val();
+                    if (val == '') {
+                        $(this).parents('tr').remove();
+                    }
+                    else if (val == "No Barcode") {
+                        $(this).parents('tr').remove();
+                    }
+                    else {
+                        preCount = parseInt($(this).parent().siblings(":first").text());
+                    }
+
+                    // $(this).parents('tr').remove();
+                });
+            }
+            else {
+                $inputs.each(function (count, input) {
+                    var val = $(input).val();
+                    $(this).parents('tr').remove();
+                });
+            }
+
+        });
+
+        var IsDamage = $("#PurchaseOrder_IsDamagePO").prop("checked") == true ? true : false;
+
+        if (ProductType == 1 || ProductType == 2) //barcode=1,Nobarcode=2
+        {
+            for (var counter = (preCount + 1) ; counter <= counterLimit; counter++) {
+                newRow = $("<tr>");
+                cols = "";
+                cols += '<td width="5%">' + counter + '</td>';
+                cols += '<td width="26.84%">' + productName + '</td>';
+                cols += '<td width="30%"><input type="text" class="form-control input-sm input-sm" onblur="checkDuplicateIMEINo()" oninput="moveCursorToNextInput(this)" name="IMEINo' + counter + '" id="IMEINo' + counter + '"/></td>';
+                if (IsDamage == true) {
+                    cols += '<td width="50%"><input type="text" readonly class="form-control input-sm input-sm" onblur="checkDuplicateDIMEINo()" oninput="moveCursorToNextInputForDamage(this)" name="DIMEINo' + counter + '" id="DIMEINo' + counter + '"/></td>';
+                    cols += '<td width="20%"><button type="button" id=' + counter + ' class="btn btn-xs btn-info btnGetDamageProduct" title="Get Damage Product"><i class="fa fa-info-circle"></i></button></td>';
+                }
+                else {
+                    cols += '<td width="50%"><input type="text" readonly class="form-control input-sm input-sm" onblur="checkDuplicateDIMEINo()" oninput="moveCursorToNextInputForDamage(this)" name="DIMEINo' + counter + '" id="DIMEINo' + counter + '"/></td>';
+                    cols += '<td width="20%"><button type="button" id=' + counter + ' class="btn btn-xs btn-info btnGetDamageProduct" title="Get Damage Product" disabled><i class="fa fa-info-circle"></i></button></td>';
+                }
+                newRow.append(cols);
+                $("#productIdentifierTable").append(newRow);
+            }
+        }
+        else if (ProductType == 3)//auto barcode =3
+        {
+
+            $.ajax({
+                url: "/PurchaseOrder/GetUniqueBarCode",
+                type: "GET",
+                data: { 'MaxSize': 7, 'Quantity': quantity },
+                dataType: "json",
+                success: function (data) {
+                    for (var counter = (preCount + 1) ; counter <= counterLimit; counter++) {
+                        newRow = $("<tr>");
+                        cols = "";
+                        cols += '<td width="9.97%">' + counter + '</td>';
+                        cols += '<td width="26.84%">' + productName + '</td>';
+                        cols += '<td width="63.18%"><input type="text" class="form-control input-sm input-sm" name="IMEINo' + counter + '" id="IMEINo' + counter + '" value="' + data[counter - 1] + '" /></td>';
+                        if (IsDamage == true) {
+                            cols += '<td width="50%"><input type="text" class="form-control input-sm input-sm" onblur="checkDuplicateDIMEINo()" oninput="moveCursorToNextInputForDamage(this)" name="DIMEINo' + counter + '" id="DIMEINo' + counter + '"/></td>';
+                        }
+                        else {
+                            cols += '<td width="50%"><input type="text" readonly class="form-control input-sm input-sm"  oninput="moveCursorToNextInputForDamage(this)" name="DIMEINo' + counter + '" id="DIMEINo' + counter + '"/></td>';
+                        }
+                        newRow.append(cols);
+                        $("#productIdentifierTable").append(newRow);
+                    }
+                },
+                error: function (err) {
+
+                }
+            });
+        }
+
+
+    }
+
+
+    function moveCursorToNextInput(x) {
+        if (x.value == "" || x.value == NaN) {
+            return;
+        }
+        @if(User.Identity.GetConcernId() == 5 || User.Identity.GetConcernId() == 6 || User.Identity.GetConcernId() == 1)
+        {
+            @:return;
+                                                                                                                        }
+        setTimeout(function () {
+            $inputs = $(x).parents('tr').next('tr').find('input[name^="IMEINo"]');
+            $inputs.each(function (count, input) {
+                $(input).focus();
+            });
+        }, 500);
+    }
+
+    function moveCursorToNextInputForDamage(x) {
+        if (x.value == "" || x.value == NaN) {
+            return;
+        }
+        @if(User.Identity.GetConcernId() == 5 || User.Identity.GetConcernId() == 6 || User.Identity.GetConcernId() == 1)
+    {
+        @:return;
+                                                                                                    }
+        setTimeout(function () {
+            $inputs = $(x).parents('tr').next('tr').find('input[name^="DIMEINo"]');
+            $inputs.each(function (count, input) {
+                $(input).focus();
+            });
+        }, 500);
+    }
+
+    function checkDuplicateIMEINo() {
+        var previousVal = '';
+        $inputs = $('#productIdentifierTable').find('input[name^="IMEINo"]');
+        $inputs.each(function (count, input) {
+            if ($(input).val() != '' && $(input).val().toLowerCase() == previousVal.toLowerCase()) {
+                toastr['error']('Duplicate IMEI/Barcode found');
+                $(input).val('');
+                $(input).focus();
+                return;
+            }
+            previousVal = $(input).val();
+        });
+    }
+
+    function checkDuplicateDIMEINo() {
+        var previousVal = '';
+        $inputs = $('#productIdentifierTable').find('input[name^="DIMEINo"]');
+        $inputs.each(function (count, input) {
+            if ($(input).val() != '' && $(input).val().toLowerCase() == previousVal.toLowerCase()) {
+                toastr['error']('Duplicate IMEI/Barcode found');
+                $(input).val('');
+                $(input).focus();
+                return;
+            }
+            previousVal = $(input).val();
+        });
+    }
+    //**************************
+    //Per Product Event start
+    //**************************
+
+    $("#PODetail_MRPRateParent").on("input", function () {
+        var ConvertValue = getDefaultFloatIfEmpty($("#PODetail_ConvertValue").val());
+
+        if (ConvertValue != 0) {
+            //alert('fried');
+            var mrpRateParent = getDefaultFloatIfEmpty($("#PODetail_MRPRateParent").val());
+            var mrpRate = (mrpRateParent / ConvertValue).toFixed(4);
+
+
+
+            $("#PODetail_MRPRate").val(mrpRate).trigger('input');
+        }
+
+    });
+
+
+
+
+    $("#PODetail_MRPRate").on("input", function () {
+        var quantity = getDefaultIntIfEmpty($("#PODetail_Quantity").val());
+        var mrpRate = getDefaultFloatIfEmpty($(this).val());
+        var total = (quantity * mrpRate).toFixed(4);
+        var ConvertValue = getDefaultFloatIfEmpty($("#PODetail_ConvertValue").val());
+
+        var percentage = getDefaultFloatIfEmpty($("#PODetail_PPDisPercentage").val());
+        var PPDamount = (((mrpRate) * percentage) / 100).toFixed(4);
+        total = total - (PPDamount * quantity);
+        var UnitPrice = (mrpRate - PPDamount).toFixed(4);
+
+        var ExPercentage = getDefaultFloatIfEmpty($("#PODetail_ExtraPPDISPer").val());
+        var ExPPDamount = (((UnitPrice) * ExPercentage) / 100).toFixed(4);
+        total = total - (ExPPDamount * quantity);
+        UnitPrice = (UnitPrice - ExPPDamount).toFixed(4);
+
+        var PPOffer = getDefaultFloatIfEmpty($("#PODetail_PPOffer").val());
+        UnitPrice = (UnitPrice - PPOffer).toFixed(4);
+        total = total - (PPOffer * quantity);
+        total = total.toFixed(4);
+        mrpRate = mrpRate.toFixed(4);
+        $("#PODetail_TAmount").val(getDefaultFloatIfEmpty(total));
+        $("#PODetail_PPDiscountAmount").val(PPDamount);
+        $("#PODetail_ExtraPPDISAmt").val(ExPPDamount);
+        $("#PODetail_UnitPrice").val(UnitPrice);
+        $("#PODetail_CRSalesRate3Month").val(mrpRate);
+        $("#PODetail_SalesRate").val(mrpRate);
+    });
+
+    $("#PODetail_PPDisPercentage").on("input", function () {
+        var percentage = getDefaultFloatIfEmpty($(this).val());
+        var quantity = getDefaultIntIfEmpty($("#PODetail_Quantity").val());
+        var mrpRate = getDefaultFloatIfEmpty($("#PODetail_MRPRate").val());
+
+        var PPDamount = (((mrpRate * percentage) / 100)).toFixed(4);
+        $("#PODetail_PPDiscountAmount").val(PPDamount);
+        var UnitPrice = mrpRate - PPDamount;
+        var total = (quantity * mrpRate).toFixed(4);
+        total = total - (PPDamount * quantity);
+
+        var ExPercentage = getDefaultFloatIfEmpty($("#PODetail_ExtraPPDISPer").val());
+        var ExPPDamount = (((UnitPrice) * ExPercentage) / 100).toFixed(4);
+        total = total - (ExPPDamount * quantity);
+        UnitPrice = UnitPrice - ExPPDamount;
+
+        var PPOffer = getDefaultFloatIfEmpty($("#PODetail_PPOffer").val());
+        UnitPrice = UnitPrice - PPOffer;
+        total = total - (PPOffer * quantity);
+
+        $("#PODetail_ExtraPPDISAmt").val(ExPPDamount);
+
+        $("#PODetail_UnitPrice").val((UnitPrice).toFixed(4));
+        total = total.toFixed(4);
+        $("#PODetail_TAmount").val(getDefaultFloatIfEmpty(total));
+    });
+
+    $("#PODetail_PPDiscountAmount").on("input", function () {
+        var PPDamount = getDefaultFloatIfEmpty($(this).val());
+        var quantity = getDefaultIntIfEmpty($("#PODetail_Quantity").val());
+        var mrpRate = getDefaultFloatIfEmpty($("#PODetail_MRPRate").val());
+
+        var percentage = getDefaultFloatIfEmpty(((100 * PPDamount) / (quantity * mrpRate)) * quantity).toFixed(4);
+        $("#PODetail_PPDisPercentage").val(percentage);
+        var UnitPrice = mrpRate - PPDamount;
+        var total = (quantity * mrpRate).toFixed(4);
+        total = total - (PPDamount * quantity);
+
+        var PPOffer = getDefaultFloatIfEmpty($("#PODetail_PPOffer").val());
+        UnitPrice = UnitPrice - PPOffer;
+        total = total - (PPOffer * quantity);
+
+        var ExPercentage = getDefaultFloatIfEmpty($("#PODetail_ExtraPPDISPer").val());
+        var ExPPDamount = (((UnitPrice) * ExPercentage) / 100).toFixed(4);
+        total = total - (ExPPDamount * quantity);
+        UnitPrice = UnitPrice - ExPPDamount;
+        $("#PODetail_ExtraPPDISAmt").val(ExPPDamount);
+
+        $("#PODetail_UnitPrice").val((UnitPrice).toFixed(4));
+
+        total = total.toFixed(4);
+        $("#PODetail_TAmount").val(getDefaultFloatIfEmpty(total));
+
+    });
+
+    $("#PODetail_ExtraPPDISPer").on("input", function () {
+        var percentage = getDefaultFloatIfEmpty($("#PODetail_PPDisPercentage").val());
+        var quantity = getDefaultIntIfEmpty($("#PODetail_Quantity").val());
+        var mrpRate = getDefaultFloatIfEmpty($("#PODetail_MRPRate").val());
+        var PPDamount = getDefaultFloatIfEmpty($("#PODetail_PPDiscountAmount").val()); //((((quantity * mrpRate) * percentage) / 100) / quantity).toFixed(4);
+        // $("#PODetail_PPDiscountAmount").val(PPDamount);
+        var UnitPrice = mrpRate - PPDamount;
+        var total = (quantity * mrpRate).toFixed(4);
+        total = total - (PPDamount * quantity);
+
+        var ExPercentage = getDefaultFloatIfEmpty($("#PODetail_ExtraPPDISPer").val());
+        var ExPPDamount = (((UnitPrice) * ExPercentage) / 100).toFixed(4);
+        total = total - (ExPPDamount * quantity);
+        UnitPrice = UnitPrice - ExPPDamount;
+
+        var PPOffer = getDefaultFloatIfEmpty($("#PODetail_PPOffer").val());
+        UnitPrice = UnitPrice - PPOffer;
+        total = total - (PPOffer * quantity);
+
+
+        $("#PODetail_ExtraPPDISAmt").val(ExPPDamount);
+        $("#PODetail_UnitPrice").val((UnitPrice).toFixed(4));
+        total = total.toFixed(4);
+        $("#PODetail_TAmount").val(getDefaultFloatIfEmpty(total));
+    });
+
+    $("#PODetail_ExtraPPDISAmt").on("input", function () {
+        var PPDamount = getDefaultFloatIfEmpty($("#PODetail_PPDiscountAmount").val());
+        var quantity = getDefaultIntIfEmpty($("#PODetail_Quantity").val());
+        var mrpRate = getDefaultFloatIfEmpty($("#PODetail_MRPRate").val());
+
+        //var percentage =getDefaultFloatIfEmpty( $("#PODetail_PPDisPercentage").val(percentage)); //getDefaultFloatIfEmpty(((100 * PPDamount) / (quantity * mrpRate)) * quantity).toFixed(4);
+        //$("#PODetail_PPDisPercentage").val(percentage);
+        var UnitPrice = mrpRate - PPDamount;
+        var total = (quantity * mrpRate).toFixed(4);
+        total = total - (PPDamount * quantity);
+
+        var ExPPDamount = getDefaultFloatIfEmpty($(this).val());
+        var ExPercentage = getDefaultFloatIfEmpty(((100 * ExPPDamount) / (quantity * UnitPrice)) * quantity).toFixed(4);
+        total = total - (ExPPDamount * quantity);
+        UnitPrice = UnitPrice - ExPPDamount;
+
+        $("#PODetail_ExtraPPDISPer").val(ExPercentage);
+
+        var PPOffer = getDefaultFloatIfEmpty($("#PODetail_PPOffer").val());
+        UnitPrice = UnitPrice - PPOffer;
+        total = total - (PPOffer * quantity);
+        total = total.toFixed(4);
+        $("#PODetail_UnitPrice").val((UnitPrice).toFixed(4));
+
+
+        $("#PODetail_TAmount").val(getDefaultFloatIfEmpty(total));
+
+    });
+
+    $("#PODetail_PPOffer").on("input", function () {
+        var quantity = getDefaultIntIfEmpty($("#PODetail_Quantity").val());
+        var mrpRate = getDefaultFloatIfEmpty($("#PODetail_MRPRate").val());
+        var total = (quantity * mrpRate).toFixed(4);
+
+        var percentage = getDefaultFloatIfEmpty($("#PODetail_PPDisPercentage").val());
+        var PPDamount = (((mrpRate) * percentage) / 100).toFixed(4);
+        total = total - (PPDamount * quantity);
+        var UnitPrice = mrpRate - PPDamount;
+
+        var ExPercentage = getDefaultFloatIfEmpty($("#PODetail_ExtraPPDISPer").val());
+        var ExPPDamount = (((UnitPrice) * ExPercentage) / 100).toFixed(4);
+        total = total - (ExPPDamount * quantity);
+        UnitPrice = UnitPrice - ExPPDamount;
+
+        var PPOffer = getDefaultFloatIfEmpty($("#PODetail_PPOffer").val());
+        UnitPrice = UnitPrice - PPOffer;
+        total = total - (PPOffer * quantity);
+
+
+        total = total.toFixed(4);
+        $("#PODetail_TAmount").val(getDefaultFloatIfEmpty(total));
+        $("#PODetail_UnitPrice").val((UnitPrice).toFixed(4));
+
+    });
+
+
+    $("#PODetail_ParentQuantity").on('input', function () {
+        CalculateTotalQty();
+        CalculateTotalArea();
+    });
+
+    $("#PODetail_ChildQuantity").on('input', function () {
+        CalculateTotalQty();
+        CalculateTotalArea();
+    });
+
+    function CalculateTotalQty() {
+        var ConvertValue = getDefaultFloatIfEmpty($("#PODetail_ConvertValue").val());
+        var ChildQty = getDefaultFloatIfEmpty($("#PODetail_ChildQuantity").val());
+        var ParentQty = getDefaultFloatIfEmpty($("#PODetail_ParentQuantity").val());
+        var TotalQty = parseFloat((ConvertValue * ParentQty) + ChildQty);
+        $("#PODetail_Quantity").val(TotalQty).trigger('input');
+    }
+
+    $("#PODetail_RatePerArea").on('input', function () {
+        CalculateTotalArea();
+    });
+
+    function CalculateTotalArea() {
+        var SizeName = $("#PODetail_SizeName").val();
+        var spSize = SizeName.split('x');
+        var CategoryName = $('#CategoryName').val();
+        if (CategoryName == "Tiles") {
+            var TotalQty = $("#PODetail_Quantity").val();
+            //var SqMPerPCS = ((parseFloat(spSize[0] * spSize[1])) / 10000); //sq m
+            var AreaPerCarton = $("#PODetail_AreaPerCarton").val();
+            var ConvertValue = getDefaultFloatIfEmpty($("#PODetail_ConvertValue").val());
+            var SqFtPerPcs = parseFloat(AreaPerCarton / ConvertValue);//sq ft
+            var TotalAreaSqft = parseFloat((SqFtPerPcs * TotalQty)); //sq ft
+            $("#PODetail_TotalArea").val(TotalAreaSqft);
+            var RatePerSqFt = getDefaultFloatIfEmpty($("#PODetail_RatePerArea").val()); //rate per sq ft
+            var RatePerPcs = parseFloat(SqFtPerPcs * RatePerSqFt);
+            $("#PODetail_MRPRate").val(RatePerPcs).trigger('input');
+            // var AreaPerCarton = parseFloat(ConvertValue * SqFtPerPcs);
+            //$("#PODetail_AreaPerCarton").val(AreaPerCarton).trigger('input');
+        }
+    }
+
+    //**************************
+    //Per Product Event end
+    //**************************
+
+
+
+
+    //Flat discount Percentage
+    $("#PurchaseOrder_TotalDiscountPercentage").on("input", function () {
+        var totalPercentage = getDefaultFloatIfEmpty($(this).val());
+        var totalAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_GrandTotal").val());
+        var totalDiscountAmount = getDefaultFloatIfEmpty((totalAmount * totalPercentage) / 100).toFixed(2);
+        $("#PurchaseOrder_TotalDiscountAmount").val(totalDiscountAmount);
+        calculateVariousValue(totalDiscountAmount, totalAmount);
+    });
+
+    //Flat discount Amount
+    $("#PurchaseOrder_TotalDiscountAmount").on("input", function () {
+        var totalDiscountAmount = getDefaultFloatIfEmpty($(this).val());
+        var totalAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_GrandTotal").val());
+        var totalPercentage = getDefaultFloatIfEmpty((100 * totalDiscountAmount) / totalAmount).toFixed(2);
+
+        $("#PurchaseOrder_TotalDiscountPercentage").val(totalPercentage);
+        calculateVariousValue(totalDiscountAmount, totalAmount);
+    });
+
+    $("#PurchaseOrder_LabourCost").on("input", function () {
+        var totalAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_GrandTotal").val());
+        var totalDiscountAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_TotalDiscountAmount").val());
+        calculateVariousValue(totalDiscountAmount, totalAmount);
+    });
+
+    function calculateVariousValue(flatDiscountAmt, grandtotalAmount) {
+        //var discountAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_PPDiscountAmount").val());
+        var tempFlatDisAmt = getDefaultFloatIfEmpty($("#PurchaseOrder_tempFlatDiscountAmount").val());
+        var tempNetDisAmt = getDefaultFloatIfEmpty($("#PurchaseOrder_tempNetDiscount").val());
+        var updatedflatDiscountAmount = parseFloat(flatDiscountAmt) - parseFloat(tempFlatDisAmt);
+        var labourCost = getDefaultFloatIfEmpty($("#PurchaseOrder_LabourCost").val());
+        var recieveAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_RecieveAmount").val());
+        var adjAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_AdjAmount").val());
+        //var dueAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_CurrentDue").val());
+        var updateNetDisAmt = tempNetDisAmt + updatedflatDiscountAmount;
+        $("#PurchaseOrder_NetDiscount").val(getDefaultFloatIfEmpty(updateNetDisAmt).toFixed(2));
+        $("#PurchaseOrder_TotalAmount").val((getDefaultFloatIfEmpty(grandtotalAmount - (updateNetDisAmt + adjAmount)) + labourCost).toFixed(2));
+        $("#PurchaseOrder_PaymentDue").val(getDefaultFloatIfEmpty((getDefaultFloatIfEmpty(grandtotalAmount - (updateNetDisAmt + adjAmount)) + labourCost) - recieveAmount).toFixed(2));
+    }
+
+    $("#PurchaseOrder_RecieveAmount").on("input", function () {
+        var totalAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_GrandTotal").val());
+        var totalDiscountAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_TotalDiscountAmount").val());
+        calculateVariousValue(totalDiscountAmount, totalAmount);
+    });
+
+    $("#PurchaseOrder_AdjAmount").on("input", function () {
+        var totalAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_GrandTotal").val());
+        var totalDiscountAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_TotalDiscountAmount").val());
+        calculateVariousValue(totalDiscountAmount, totalAmount);
+    });
+
+    //$("#PurchaseOrder_CurrentDue").on("input", function () {
+    //    if (window.location.pathname.toLowerCase() == "/purchaseorder/create") {
+    //        var totalAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_GrandTotal").val());
+    //        var totalDiscountAmount = getDefaultFloatIfEmpty($("#PurchaseOrder_TotalDiscountAmount").val());
+    //        calculateVariousValue(totalDiscountAmount, totalAmount);
+    //    }
+    //});
+
+    //******************************************************
+    //          Product data populate with new picker
+    //******************************************************
+
+    $('#txtSupplierId').change(function () {
+        var supId = getDefaultIntIfEmpty($(this).val());
+        if (supId > 0) {
+            loadSupplierInfo(supId);
+        }
+    });
+
+    //$('#txtProductId').change(function () {
+    //    var prId = getDefaultIntIfEmpty($(this).val());
+    //    if (prId > 0) {
+    //        loadProductInfo(prId);
+    //    }
+    //});
+
+    function loadSupplierInfo(supplierId) {
+        $.ajax({
+            url: "/PurchaseOrder/GetSupplierInfoById",
+            type: "GET",
+            data: { 'supplierId': supplierId },
+            dataType: "json",
+            success: function (supplier) {
+                $('#SuppliersCode').val($.trim(supplier.Code));
+                $('#SuppliersName').val($.trim(supplier.Name));
+                $('#SuppliersId').val($.trim(supplier.Id));
+                $('[id*="CurrentDue"]').val($.trim(supplier.TotalDue));
+            },
+            error: function (err) {
+                toastr.error(JSON.stringify(err));
+                console.log(JSON.stringify(err))
+            }
+        });
+    }
+
+    //function loadProductInfo(productId) {
+    //    $.ajax({
+    //        url: "/PurchaseOrder/GetProductInfoById",
+    //        type: "GET",
+    //        data: { 'productId': productId },
+    //        dataType: "json",
+    //        success: function (product) {
+    //            $('#ProductsCode').val($.trim(product.Code));
+    //            $('#ProductsName').val($.trim(product.Name));
+    //            $('#ProductsId').val($.trim(product.Id));
+    //        },
+    //        error: function (err) {
+    //            toastr.error(JSON.stringify(err));
+    //            console.log(JSON.stringify(err))
+    //        }
+    //    });
+    //}
+
+</script>

@@ -1,0 +1,78 @@
+﻿@model IEnumerable<EmployeeTargetSetupViewModel>
+
+@{
+    ViewBag.Title = "Index";
+    int Counter = 1;
+}
+
+<h4 class="text-left inline-header">Existing Employee Target Setup</h4>
+@Html.ActionLink("Create New Employee Target Setup", "Create", "EmployeeTargetSetup", routeValues: null, htmlAttributes: new { @class = "btn btn-primary btn-sm pull-right", id = "toolbar" })
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <table id="companyTable"
+                       data-toggle="table"
+                       data-search="true"
+                       data-show-refresh="true"
+                       data-show-toggle="true"
+                       data-show-columns="true"
+                       data-show-export="true"
+                       data-detail-view="true"
+                       data-pagination="true"
+                       data-id-field="name"
+                       data-page-list="[10, 25, 50, 100, ALL]"
+                       data-page-size="10"
+                       data-toolbar="#toolbar"
+                       class="table table-responsive table-bordered table-striped" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th data-field="sl"
+                                data-sortable="true">
+                                Sl
+                            </th>
+                            <th data-field="EmployeeID"
+                                data-sortable="true">
+                                @Html.DisplayNameFor(model => model.EmployeeName)
+                            </th>
+                            <th data-field="AmtFrom"
+                                data-sortable="true">
+                                @Html.DisplayNameFor(model => model.TargetAmt)
+                            </th>
+                            <th data-field="TargetMonth"
+                                data-sortable="true">
+                                @Html.DisplayNameFor(model => model.TargetMonth)
+                            </th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @Counter
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.EmployeeName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.TargetAmt)
+                                </td>
+                                <td>
+                                    @item.TargetMonth.ToString("dd MMM yyyy")
+                                </td>
+                                <td>
+                                    @Html.ActionLink("Edit", "Edit", new { id = item.ETSID }) |
+                                    @Html.ActionLink("Delete", "Delete", new { id = item.ETSID }, new { onclick = "if(!confirm('Do you want to delete?')) return false;" })
+                                </td>
+                            </tr>
+                            Counter++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

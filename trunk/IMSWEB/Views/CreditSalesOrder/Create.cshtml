@@ -1,0 +1,1025 @@
+<style>
+    .col-md-4 {
+        padding-right: 0px !important;
+    }
+
+    .col-md-8 {
+        padding-left: 0px !important;
+    }
+</style>
+@using IMSWEB.Model
+@model CreditSalesOrderViewModel
+@{
+    string calculationStatus = ViewBag.Status != null ? "disabled" : ViewBag.Status;
+    string saveStatus = ViewBag.Status == null ? "disabled" : ViewBag.Status;
+    string actionName = ViewContext.RouteData.Values["action"].ToString();
+    int totalScheduleRow = 0;
+    ViewBag.Title = actionName + " Credit Sales Order";
+}
+<h4>@(ViewBag.Title + ".")</h4>
+<hr />
+@using (Html.BeginForm(actionName, "CreditSalesOrder", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("scheduleDate");
+    @Html.Hidden("CSScheduleID");
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.InvoiceNo, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.InvoiceNo, new { htmlAttributes = new { @class = "input-sm form-control input-sm" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.InvoiceNo, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.OrderDate, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    <div class='input-group date' id='OrderDate'>
+                                        <input type='text' class="input-sm form-control input-sm" name='OrderDate' />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                                        </span>
+                                    </div>
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.OrderDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.CustomerId, new { @class = "control-label col-md-2 full-width-picker-label" })
+                                <div class="col-md-10 full-width-picker">
+                                    @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.CreditCustomer, id = (Model != null && Model.SalesOrder != null && Model.SalesOrder.CustomerId != null) ? Model.SalesOrder.CustomerId : "0" });}
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.CustomerId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.CurrentDue, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.CurrentDue, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.CurrentDue, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <b><span id="SalesOrder_OfferDescription" class="tag">@Model.SalesOrder.OfferDescription</span></b>
+                            </div>
+                            <div class="form-group">
+                                <input autofocus="autofocus" class="input-sm form-control text-box single-line" id="externalIMENo" name="externalIMENo" style="margin-left: 5px !important;margin-right: 5px !important; width:98%;" type="text" value="">
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    <label for="selSalesRate">Select Sales Rate:</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <select class="form-control input-sm" id="selSalesRate" name="selSalesRate">
+                                        <option  value="1">3 Months</option>
+                                        <option selected value="2">6 Months</option>
+                                        <option value="3">12 Months</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SODetail.ProductId, new { @class = "control-label col-md-2 full-width-picker-label" })
+                                <div class="col-md-10 full-width-picker">
+                                    @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.CreditProductDetail, id = (Model != null && Model.SODetail != null && Model.SODetail.ProductId != null) ? Model.SODetail.ProductId : "0" });}
+                                    @Html.ValidationMessageFor(m => m.SODetail.ProductId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SODetail.IMENo, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SODetail.IMENo, new { htmlAttributes = new { @class = "input-sm form-control", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SODetail.IMENo, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SODetail.MRPRate, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SODetail.MRPRate, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SODetail.MRPRate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SODetail.PPOffer, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SODetail.PPOffer, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                    @Html.ValidationMessageFor(m => m.SODetail.PPOffer, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SODetail.IntPercentage, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SODetail.IntPercentage, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                    @Html.ValidationMessageFor(m => m.SODetail.IntPercentage, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SODetail.ColorName, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SODetail.ColorName, new { htmlAttributes = new { @class = "input-sm form-control", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SODetail.ColorName, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SODetail.Quantity, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SODetail.Quantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SODetail.Quantity, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SODetail.UnitPrice, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SODetail.UnitPrice, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SODetail.UnitPrice, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SODetail.IntTotalAmt, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SODetail.IntTotalAmt, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                    @Html.ValidationMessageFor(m => m.SODetail.IntTotalAmt, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SODetail.UTAmount, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SODetail.UTAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SODetail.UTAmount, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.Remarks, new { @class = "control-label col-md-2" })
+                                <div class="col-md-10">
+                                    @Html.EditorFor(m => m.SalesOrder.Remarks, new { htmlAttributes = new { @class = "input-sm form-control", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.Remarks, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">Warrenty</div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SODetail.CompressorWarrentyMonth, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SODetail.CompressorWarrentyMonth, new { htmlAttributes = new { @class = "input-sm form-control", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SODetail.CompressorWarrentyMonth, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SODetail.PanelWarrentyMonth, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SODetail.PanelWarrentyMonth, new { htmlAttributes = new { @class = "input-sm form-control", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SODetail.PanelWarrentyMonth, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SODetail.MotorWarrentyMonth, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SODetail.MotorWarrentyMonth, new { htmlAttributes = new { @class = "input-sm form-control", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SODetail.MotorWarrentyMonth, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SODetail.SparePartsWarrentyMonth, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SODetail.SparePartsWarrentyMonth, new { htmlAttributes = new { @class = "input-sm form-control", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SODetail.SparePartsWarrentyMonth, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SODetail.ServiceWarrentyMonth, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SODetail.ServiceWarrentyMonth, new { htmlAttributes = new { @class = "input-sm form-control", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SODetail.ServiceWarrentyMonth, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.TotalDiscountPercentage, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.TotalDiscountPercentage, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.TotalDiscountPercentage, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.VATPercentage, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.VATPercentage, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.VATPercentage, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.InterestRate, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.InterestRate, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.InterestRate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.InstallmentDate, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    <div class='input-group date' id='InstallmentDate'>
+                                        <input type='text' class="input-sm form-control input-sm" name='InstallmentDate' />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                                        </span>
+                                    </div>
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.InstallmentDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.NetDiscount, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.NetDiscount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.NetDiscount, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.TotalAmount, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.TotalAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.TotalAmount, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.PayAdjustment, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.PayAdjustment, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.PayAdjustment, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.TotalDiscountAmount, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.TotalDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.TotalDiscountAmount, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.VATAmount, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.VATAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.VATAmount, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.InterestAmount, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.InterestAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.InterestAmount, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.RecieveAmount, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.RecieveAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.RecieveAmount, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.InstallmentNo, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @if(actionName.Equals("Edit"))
+                                    {
+                                       @Html.EditorFor(m => m.SalesOrder.InstallmentNo, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number",} })
+                                    }
+                                    else
+                                    {
+                                       @Html.EditorFor(m => m.SalesOrder.InstallmentNo, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number",@readonly="readonly"} })
+                                    }
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.InstallmentNo, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.PaymentDue, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.PaymentDue, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.PaymentDue, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.ExtendTimeInterestAmount, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.ExtendTimeInterestAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01"} })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.ExtendTimeInterestAmount, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="pull-right">
+                        <input type="submit" class="btn btn-sm btn-primary" name="installmentButton" value="Calculate Installments" @(actionName.Equals("Create") ? calculationStatus : "disabled") />
+                        <input type="submit" class="btn btn-sm btn-primary" id="submitButton" name="submitButton" value="Save order" @(actionName.Equals("Create") ? saveStatus : "disabled") />
+                        @if (User.IsInRole("LocalAdmin") || User.IsInRole("Admin"))
+                        {
+                         <input type="submit" class="btn btn-sm btn-primary" id="updateBtn" name="updateBtn" value="Increase Inst" @(actionName.Equals("Edit") ? "data-attr:enabled" : "disabled") />
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.GrandTotal, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.GrandTotal, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(m => m.SalesOrder.GrandTotal, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.SalesOrder.TotalOffer, new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.EditorFor(m => m.SalesOrder.TotalOffer, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.HiddenFor(m => m.SalesOrder.PPDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+
+                                </div>
+                            </div>
+                        </div>
+                        @*<div class="col-md-4">
+                                <div class="form-group">
+                                    @Html.LabelFor(m => m.SalesOrder.PPDiscountAmount, new { @class = "control-label col-md-4" })
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(m => m.SalesOrder.PPDiscountAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                        @Html.ValidationMessageFor(m => m.SalesOrder.PPDiscountAmount, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>*@
+                    </div>
+                </div>
+            </div>
+            <table id="productTable"
+                   data-toggle="table"
+                   data-height="192"
+                   class="table table-responsive table-bordered table-striped text-nowrap" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>
+                            Sl
+                        </th>
+                        <th data-field="code"
+                            data-sortable="true">
+                            @Html.DisplayNameFor(model => model.SODetail.ProductName)
+                        </th>
+                        <th data-field="colorname"
+                            data-sorter="sorter"
+                            data-sortable="true">
+                            @Html.DisplayNameFor(model => model.SODetail.ColorName)
+                        </th>
+                        <th data-field="productName"
+                            data-sorter="sorter"
+                            data-sortable="true">
+                            @Html.DisplayNameFor(model => model.SODetail.IMENo)
+                        </th>
+                        <th data-field="qauntity"
+                            data-sortable="true">
+                            @Html.DisplayNameFor(model => model.SODetail.Quantity)
+                        </th>
+                        <th data-field="unitPrice"
+                            data-sortable="true">
+                            @Html.DisplayNameFor(model => model.SODetail.UnitPrice)
+                        </th>
+                        <th data-field="discountPercent"
+                            data-sortable="true">
+                            Interest (%)
+                        </th>
+                        <th data-field="discountAmount"
+                            data-sortable="true">
+                            Interest (Amount)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.SODetail.UTAmount)
+                        </th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                                    int c = 1;
+                                    foreach (var item in Model.SODetails)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @c
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.ProductName)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.ColorName)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.IMENo)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.Quantity)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.UnitPrice)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.IntPercentage)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.IntTotalAmt)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.UTAmount)
+                                            </td>
+                                            <td>
+                                                @Html.ActionLink("Edit", "EditFromView", new { id = item.ProductId, detailId = item.StockDetailId }, new { @class = "btn btn-xs btn-info", style = ViewBag.Status != null ? "Visibility : hidden" : string.Empty })
+                                            </td>
+                                            <td>
+                                                @Html.ActionLink("Delete", "DeleteFromView", new { id = item.ProductId, detailId = item.StockDetailId }, new { onclick = "if(!confirm('Do you want to delete this order?')) return false;", style = ViewBag.Status != null ? "Visibility : hidden" : string.Empty })
+                                            </td>
+                                        </tr>
+                                        c++;
+                                    }
+                    }
+                </tbody>
+            </table>
+            <br />
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="pull-right">
+                        <input type="submit" class="btn btn-sm btn-primary" name="addButton" value="Add to order" @(actionName.Equals("Create") ? calculationStatus : "disabled") />
+                        <button type="reset" class="btn btn-sm btn-danger" @(actionName.Equals("Create") ? calculationStatus : "disabled")>Clear</button>
+                    </div>
+                </div>
+            </div>
+            <table id="scheduleTable"
+                   data-toggle="table"
+                   data-single-select="true"
+                   data-height="278"
+                   class="table table-responsive table-bordered table-striped text-nowrap" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th data-checkbox="true"></th>
+                        <th data-field="CSScheduleID" class="hidden"></th>
+                        <th>
+                            Sl
+                        </th>
+                        <th data-field="schedule">
+                            Schedule
+                        </th>
+                        <th data-field="paydate">
+                            Pay Date
+                        </th>
+                        <th data-field="openingbalance">
+                            Opening
+                        </th>
+                        <th data-field="netvalue">
+                            Net
+                        </th>
+                        <th data-field="hirevalue">
+                            Hire
+                        </th>
+                        <th data-field="installmentamount">
+                            Installment
+                        </th>
+                        <th data-field="closingbalance">
+                            Closing
+                        </th>
+                        <th data-field="paymentstatus">
+                            Status
+                        </th>
+                        <th data-field="remarks">
+                            Remarks
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                                    int i = 1;
+                                    foreach (var item in Model.SOSchedules)
+                                    {
+                                        <tr class="@((!string.IsNullOrEmpty(item.PayDate) && item.PaymentStatus.Equals("Paid")) ? "paidInstallment" : string.Empty)">
+                                            <td></td>
+                                            <td class="hidden">@item.CSScheduleID</td>
+                                            <td>
+                                                @i
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.ScheduleDate)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.PayDate)
+                                                @*<div class='input-group date' id='paydate'>
+                                                        <input type='text' class="form-control input-sm" />
+                                                        <span class="input-group-addon">
+                                                            <span class="glyphicon glyphicon-calendar"></span>
+                                                        </span>
+                                                    </div>*@
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.OpeningBalance)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.NetValue)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.HireValue)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.InstallmentAmount)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.ClosingBalance)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.PaymentStatus)
+                                            </td>
+                                            <td width="150px">
+                                                <input type="text" class="form-control input-sm" value="@item.Remarks" name="@("Remarks" +  item.ScheduleDate)" />
+                                            </td>
+                                        </tr>
+                                        i++;
+                                    }
+
+                                    totalScheduleRow = i - 2;
+                    }
+                </tbody>
+            </table>
+            <br />
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <div class='input-group date' id='Paydate'>
+                                    <input type='text' name="Paydate" id="paidDate" class="form-control input-sm" />
+                                    <span class="input-group-addon">
+                                        <span class="glyphicon glyphicon-calendar"></span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            @Html.EditorFor(m => m.SalesOrder.InstallmentAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", disabled = "disabled" } })
+                            @Html.ValidationMessageFor(m => m.SalesOrder.InstallmentAmount, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="col-md-2">
+                            <div class="checkbox">
+                                <label for="SalesOrder_IsAllPaid">@Html.EditorFor(m => m.SalesOrder.IsAllPaid) All Paid</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="btn-group">
+                                <input type="submit" class="btn btn-sm btn-primary" id="paymentButton" name="paymentButton" value="Paid" disabled="disabled" />
+                                <input type="submit" class="btn btn-sm btn-info ml-2" id="btnremaindDateSetup" name="btnremaindDateSetup" value="Remaind Date" disabled="disabled" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<script>
+    $(document).ready(function () {
+        $(window).keydown(function (event) {
+            if (event.keyCode == 10 || event.keyCode == 13) {
+                event.preventDefault();
+                return false;
+            }
+        });
+
+    });
+
+    $("#SalesOrder_IsAllPaid").change(function() {
+        if(this.checked) {
+            var RemainingAmt =parseFloat($("#SalesOrder_PaymentDue").val());
+            if(RemainingAmt>0)
+            {
+                $('#SalesOrder_InstallmentAmount').removeAttr('disabled');
+                $('#paymentButton').removeAttr('disabled');
+                $('#SalesOrder_PayAdjustment').removeAttr('readonly');
+                var paydate = $("#paidDate").val();
+                $("#scheduleDate").val(paydate);
+                $("#SalesOrder_InstallmentAmount").val(RemainingAmt);
+            }
+        }
+        else
+        {
+            $('#SalesOrder_InstallmentAmount').attr('disabled',true);
+            $('#paymentButton').attr('disabled',true);
+            $('#SalesOrder_PayAdjustment').attr('readonly', 'readonly');
+            $("#scheduleDate").val('');
+        }
+    });
+
+
+    $('#OrderDate').datetimepicker({
+        @{
+                if (Model == null || Model.SalesOrder.OrderDate == null) {
+                    @:defaultDate: moment(),
+                                                                                                    }
+                else
+                {
+            @:defaultDate:'@(Convert.ToDateTime(Model.SalesOrder.OrderDate).ToString("dd-MMM-yyyy"))',
+                                                                                            }
+            @:format: 'DD-MMM-YYYY'
+                                                                                                    }
+    });
+
+    $('#Paydate').datetimepicker({
+        @{
+                if (Model == null || Model.SalesOrder.InstallmentDate == null) {
+                    @:defaultDate: moment(),
+                            }
+                    else
+                    {
+                     @:defaultDate: moment(),
+                            }
+                    @:format: 'DD-MMM-YYYY'
+            }
+    });
+
+
+
+
+    $('#InstallmentDate').datetimepicker({
+        @{
+                if (Model == null || Model.SalesOrder.InstallmentDate == null) {
+                    @:defaultDate: moment(),
+                                                                                                    }
+                else
+                {
+            @:defaultDate:'@(Convert.ToDateTime(Model.SalesOrder.InstallmentDate).ToString("dd-MMM-yyyy"))',
+                                                                                            }
+            @:format: 'DD-MMM-YYYY'
+                                                                                                    }
+    });
+
+    $("#externalIMENo").on("input", function () {
+        setTimeout(function () {
+            $.ajax({
+                url: "/CreditSalesOrder/GetProductDetailByIMEINo",
+                type: "GET",
+                data: { 'imeiNo': $("#externalIMENo").val() },
+                dataType: "json",
+                success: function (data) {
+                    setPickerControls(data);
+                    $("#externalIMENo").val('');
+                    $("#externalIMENo").attr('autofocus', 'autofocus');
+                },
+                error: function (err) {
+                    clearPickerControls();
+                    console.error(JSON.stringify(err));
+                }
+            });
+        }, @((User.Identity.GetConcernId() == 5 || User.Identity.GetConcernId() == 6 || User.Identity.GetConcernId() == 1) ? 1000 : 200));
+    });
+
+    function setPickerControls(data) {
+        if (data && data.Code != '') {
+            $("#ProductDetailsCode").val(data.Code);
+            $("#ProductDetailsName").val(data.Name);
+            $("#ProductDetailsId").val(data.Id);
+            $("#StockDetailsId").val(data.StockDetailId);
+            $("#ColorsId").val(data.ColorId);
+            $("#SODetail_ColorName").val(data.ColorName);
+            $("#SalesOrder_OfferDescription").text(data.OfferDescription);
+            $("#Offer").val(data.OfferDescription);
+            $("#SODetail_Quantity").val(1);
+            $("#SODetail_IMENo").val(data.IMEINo);
+            $("#SODetail_MRPRate").val(data.MrpRate).trigger("input");
+        }
+        else {
+            clearPickerControls();
+        }
+    }
+
+    function clearPickerControls() {
+        $("#ProductDetailsCode").val('');
+        $("#ProductDetailsName").val('');
+        $("#ProductDetailsId").val('');
+        $("#StockDetailsId").val('');
+        $("#ColorsId").val('');
+        $("#SODetail_ColorName").val('');
+        $("#Offer").val('');
+        $("#SalesOrder_OfferDescription").val('');
+        $("#SODetail_Quantity").val('');
+        $("#SODetail_IMENo").val('');
+        $("#SODetail_MRPRate").val('').trigger("input");
+    }
+
+    $(document).ready(function () {
+        $(".paidInstallment").find('input').attr("disabled", "disabled");
+    });
+
+
+    //***********************
+    //SODetail Change Event
+    //***********************
+
+    function CalculateUTAmount()
+    {
+        var quantity = getDefaultFloatIfEmpty( $("#SODetail_Quantity").val());
+        var unitprice =  getDefaultFloatIfEmpty($("#SODetail_UnitPrice").val());
+        var PPInterest =getDefaultFloatIfEmpty($("#SODetail_IntTotalAmt").val());
+        var PPoffer =   getDefaultFloatIfEmpty($("#SODetail_PPOffer").val());
+        var UTtotal = ((unitprice+PPInterest)-PPoffer)* quantity;
+        $("#SODetail_UTAmount").val(UTtotal);
+    }
+
+    $("#SODetail_Quantity").on("input",function(){
+        CalculateUTAmount();
+    });
+
+    $("#SODetail_MRPRate").on("input", function () {
+        var mrpRate = getDefaultFloatIfEmpty($(this).val()).toFixed(2);
+        $("#SODetail_UnitPrice").val(mrpRate);
+        $("#SODetail_UTAmount").val(mrpRate);
+    });
+
+    $("#SODetail_UnitPrice").on("input", function () {
+        //var unitRate = getDefaultFloatIfEmpty($(this).val()).toFixed(2);
+        //$("#SODetail_UTAmount").val(unitRate);
+        CalculateUTAmount();
+    });
+
+    //Per Product Interest Percentage input event
+    $("#SODetail_IntPercentage").on("input", function () {
+        var percentage = getDefaultFloatIfEmpty($(this).val());
+        var quantity = getDefaultIntIfEmpty($("#SODetail_Quantity").val());
+        var mrpRate = getDefaultFloatIfEmpty($("#SODetail_UnitPrice").val());
+        var OfferAmount = getDefaultFloatIfEmpty($("#SODetail_PPOffer").val());
+
+        var amount = getDefaultFloatIfEmpty(((quantity * mrpRate) * percentage) / 100).toFixed(2);
+        $("#SODetail_IntTotalAmt").val(amount);
+        $("#SODetail_UTAmount").val((getDefaultFloatIfEmpty(mrpRate)+getDefaultFloatIfEmpty(amount))-OfferAmount);
+        //$("#SODetail_UnitPrice").val((mrpRate + amount).toFixed(2)).trigger("input");
+    });
+    //Per Prouduct Interest Amount
+    $("#SODetail_IntTotalAmt").on("input", function () {
+        var amount = getDefaultFloatIfEmpty($(this).val());
+        var quantity = getDefaultIntIfEmpty($("#SODetail_Quantity").val());
+        var mrpRate = getDefaultFloatIfEmpty($("#SODetail_UnitPrice").val());
+        var OfferAmount = getDefaultFloatIfEmpty($("#SODetail_PPOffer").val());
+        var percentage = getDefaultFloatIfEmpty((100 * amount) / (quantity * mrpRate)).toFixed(2);
+        $("#SODetail_IntPercentage").val(percentage);
+        var UTAmount = (mrpRate+amount-OfferAmount)* quantity;
+        $("#SODetail_UTAmount").val(UTAmount);
+        //$("#SODetail_UnitPrice").val((mrpRate + amount).toFixed(2)).trigger("input");
+    });
+
+    $("#SODetail_PPOffer").on("input", function () {
+        var PPOffer = getDefaultFloatIfEmpty($(this).val());
+        //var UTotal = getDefaultFloatIfEmpty($("#SODetail_UTAmount").val());
+        var quantity = getDefaultIntIfEmpty($("#SODetail_Quantity").val());
+        var unitPrice= getDefaultFloatIfEmpty($("#SODetail_UnitPrice").val());
+        var interestAmount = getDefaultFloatIfEmpty($("#SODetail_IntTotalAmt").val());
+        unitPrice=(unitPrice+interestAmount-PPOffer) * quantity;
+        $("#SODetail_UTAmount").val(getDefaultFloatIfEmpty(unitPrice));
+        //$("#SODetail_UnitPrice").val((mrpRate - amount).toFixed(2)).trigger("input");
+    });
+
+
+    //***************************
+    //SODetail Change Event end
+    //***************************
+
+    $("#SalesOrder_InterestRate").on("input", function () {
+        var interestRate = getDefaultFloatIfEmpty($(this).val());
+        var totalAmount = getDefaultFloatIfEmpty($("#SalesOrder_GrandTotal").val());
+        var totalDiscountAmount = getDefaultFloatIfEmpty($("#SalesOrder_TotalDiscountAmount").val());
+        var vatAmount = getDefaultFloatIfEmpty($("#SalesOrder_VATAmount").val());
+        var interestAmount =  getDefaultFloatIfEmpty((totalAmount * interestRate) / 100).toFixed(2);
+
+
+        $("#SalesOrder_InterestAmount").val(interestAmount);
+        calculateVariousValue(totalDiscountAmount, vatAmount, totalAmount,interestAmount);
+    });
+
+    $("#SalesOrder_InterestAmount").on("input", function () {
+        var interestAmount = getDefaultFloatIfEmpty($(this).val());
+        var totalAmount = getDefaultFloatIfEmpty($("#SalesOrder_GrandTotal").val());
+        var totalDiscountAmount = getDefaultFloatIfEmpty($("#SalesOrder_TotalDiscountAmount").val());
+        var vatAmount = getDefaultFloatIfEmpty($("#SalesOrder_VATAmount").val());
+        var interestRate =  getDefaultFloatIfEmpty((100 * interestAmount) / totalAmount).toFixed(2);
+        $("#SalesOrder_InterestRate").val(interestRate);
+        calculateVariousValue(totalDiscountAmount, vatAmount, totalAmount,interestAmount);
+    });
+
+
+
+    $("#SalesOrder_TotalDiscountPercentage").on("input", function () {
+        var totalPercentage = getDefaultFloatIfEmpty($(this).val());
+        var totalAmount = getDefaultFloatIfEmpty($("#SalesOrder_GrandTotal").val());
+        var totalDiscountAmount = getDefaultFloatIfEmpty((totalAmount * totalPercentage) / 100).toFixed(2);
+        var vatAmount = getDefaultFloatIfEmpty($("#SalesOrder_VATAmount").val());
+        var interestAmount = getDefaultFloatIfEmpty($("#SalesOrder_InterestAmount").val());
+        $("#SalesOrder_TotalDiscountAmount").val(totalDiscountAmount);
+        calculateVariousValue(totalDiscountAmount, vatAmount, totalAmount,interestAmount);
+    });
+
+    $("#SalesOrder_TotalDiscountAmount").on("input", function () {
+        var totalDiscountAmount = getDefaultFloatIfEmpty($(this).val());
+        var totalAmount = getDefaultFloatIfEmpty($("#SalesOrder_GrandTotal").val());
+        var totalPercentage = getDefaultFloatIfEmpty((100 * totalDiscountAmount) / totalAmount).toFixed(2);
+        var vatAmount = getDefaultFloatIfEmpty($("#SalesOrder_VATAmount").val());
+        var interestAmount = getDefaultFloatIfEmpty($("#SalesOrder_InterestAmount").val());
+        $("#SalesOrder_TotalDiscountPercentage").val(totalPercentage);
+        calculateVariousValue(totalDiscountAmount, vatAmount, totalAmount,interestAmount);
+    });
+
+    $("#SalesOrder_VATPercentage").on("input", function () {
+        var vatPercentage = getDefaultFloatIfEmpty($(this).val());
+        var totalAmount = getDefaultFloatIfEmpty($("#SalesOrder_GrandTotal").val());
+        var netDiscount = getDefaultFloatIfEmpty($("#SalesOrder_NetDiscount").val());
+        var vatAmount = getDefaultFloatIfEmpty(((totalAmount - netDiscount) * vatPercentage) / 100);
+        var totalDiscountAmount = getDefaultFloatIfEmpty($("#SalesOrder_TotalDiscountAmount").val());
+        var interestAmount = getDefaultFloatIfEmpty($("#SalesOrder_InterestAmount").val());
+        $("#SalesOrder_VATAmount").val(vatAmount.toFixed(2));
+        calculateVariousValue(totalDiscountAmount, vatAmount, totalAmount,interestAmount);
+    });
+
+    $("#SalesOrder_VATAmount").on("input", function () {
+        var vatAmount = getDefaultFloatIfEmpty($(this).val());
+        var totalAmount = getDefaultFloatIfEmpty($("#SalesOrder_GrandTotal").val());
+        var netDiscount = getDefaultFloatIfEmpty($("#SalesOrder_NetDiscount").val());
+        var vatPercentage = getDefaultFloatIfEmpty((100 * vatAmount) / (totalAmount - netDiscount));
+        var totalDiscountAmount = getDefaultFloatIfEmpty($("#SalesOrder_TotalDiscountAmount").val());
+        var interestAmount = getDefaultFloatIfEmpty($("#SalesOrder_InterestAmount").val());
+        $("#SalesOrder_VATPercentage").val(vatPercentage.toFixed(2));
+        calculateVariousValue(totalDiscountAmount, vatAmount, totalAmount,interestAmount);
+    });
+
+    $("#SalesOrder_RecieveAmount").on("input", function () {
+        var totalAmount = getDefaultFloatIfEmpty($("#SalesOrder_GrandTotal").val());
+        var totalDiscountAmount = getDefaultFloatIfEmpty($("#SalesOrder_TotalDiscountAmount").val());
+        var vatAmount = getDefaultFloatIfEmpty($("#SalesOrder_VATAmount").val());
+        var interestAmount = getDefaultFloatIfEmpty($("#SalesOrder_InterestAmount").val());
+        calculateVariousValue(totalDiscountAmount, vatAmount, totalAmount,interestAmount);
+    });
+
+    $("#SalesOrder_PayAdjustment").on("input", function () {
+        var totalAmount = getDefaultFloatIfEmpty($("#SalesOrder_GrandTotal").val());
+        var totalDiscountAmount = getDefaultFloatIfEmpty($("#SalesOrder_TotalDiscountAmount").val());
+        var vatAmount = getDefaultFloatIfEmpty($("#SalesOrder_VATAmount").val());
+        var interestAmount = getDefaultFloatIfEmpty($("#SalesOrder_InterestAmount").val());
+        calculateVariousValue(totalDiscountAmount, vatAmount, totalAmount,interestAmount);
+    });
+
+    @*$("#SalesOrder_CurrentDue").on("input", function () {
+        if (window.location.pathname.toLowerCase() == "/creditsalesorder/create") {
+            var statusVal = '@ViewBag.Status';
+            var totalAmount = getDefaultFloatIfEmpty($("#SalesOrder_GrandTotal").val());
+            var totalDiscountAmount = getDefaultFloatIfEmpty($("#SalesOrder_TotalDiscountAmount").val());
+            var vatAmount = getDefaultFloatIfEmpty($("#SalesOrder_VATAmount").val());
+
+            var discountAmount = getDefaultFloatIfEmpty($("#SalesOrder_PPDiscountAmount").val());
+            var recieveAmount = getDefaultFloatIfEmpty($("#SalesOrder_RecieveAmount").val());
+            var dueAmount = getDefaultFloatIfEmpty($("#SalesOrder_CurrentDue").val());
+            var adjAmount = getDefaultFloatIfEmpty($("#SalesOrder_PayAdjustment").val());
+            var updatedDiscountAmount = parseFloat(totalDiscountAmount) + parseFloat(discountAmount);
+
+            $("#SalesOrder_TotalDiscountAmount").val(totalDiscountAmount);
+            $("#SalesOrder_NetDiscount").val(getDefaultFloatIfEmpty(updatedDiscountAmount).toFixed(2));
+            $("#SalesOrder_TotalAmount").val(getDefaultFloatIfEmpty((totalAmount - updatedDiscountAmount) + vatAmount).toFixed(2));
+            if (statusVal == '')
+                $("#SalesOrder_PaymentDue").val(getDefaultFloatIfEmpty((((totalAmount + dueAmount) - (updatedDiscountAmount + adjAmount)) + vatAmount) - recieveAmount).toFixed(2));
+        }
+    });*@
+
+    function calculateVariousValue(totalDiscountAmount, vatAmount, totalAmount,interestAmount) {
+        var discountAmount = getDefaultFloatIfEmpty($("#SalesOrder_PPDiscountAmount").val());
+        var recieveAmount = getDefaultFloatIfEmpty($("#SalesOrder_RecieveAmount").val());
+        //var dueAmount = getDefaultFloatIfEmpty($("#SalesOrder_CurrentDue").val());
+        var adjAmount = getDefaultFloatIfEmpty($("#SalesOrder_PayAdjustment").val());
+        var TotalOffer = getDefaultFloatIfEmpty($("#SalesOrder_TotalOffer").val());
+
+        var updatedDiscountAmount = parseFloat(totalDiscountAmount) + parseFloat(discountAmount)+ parseFloat(TotalOffer);
+        $("#SalesOrder_TotalDiscountAmount").val(totalDiscountAmount);
+        $("#SalesOrder_NetDiscount").val(getDefaultFloatIfEmpty(updatedDiscountAmount).toFixed(2));
+        $("#SalesOrder_TotalAmount").val(getDefaultFloatIfEmpty((totalAmount - updatedDiscountAmount) + vatAmount).toFixed(2));//+parseFloat(interestAmount)
+        $("#SalesOrder_PaymentDue").val(getDefaultFloatIfEmpty(((totalAmount - (updatedDiscountAmount + adjAmount)) + vatAmount) - recieveAmount).toFixed(2)); //+parseFloat(interestAmount)
+    }
+
+    var $table = $('#scheduleTable');
+    $table.on('check.bs.table', function (e, row, $element) {
+        $("#SalesOrder_IsAllPaid").attr("checked",false);
+        var rowIndex = parseInt($element.attr('data-index'));
+        $('#scheduleDate').val($.trim(row.schedule));
+        $('#SalesOrder_InstallmentAmount').removeAttr('disabled');
+        $('#SalesOrder_InstallmentAmount').val($.trim(row.installmentamount));
+        $('#paymentButton').removeAttr('disabled');
+        $('#btnremaindDateSetup').removeAttr('disabled');
+        $('#CSScheduleID').val($.trim(row.CSScheduleID));
+        if (@totalScheduleRow == rowIndex)
+            $('#SalesOrder_PayAdjustment').removeAttr('readonly');
+        else
+            $('#SalesOrder_PayAdjustment').attr('readonly', 'readonly');
+    });
+
+    $table.on('uncheck.bs.table', function (e, row, $element) {
+        var rowIndex = parseInt($element.attr('data-index'));
+        $('#scheduleDate').val('');
+        $('#CSScheduleID').val('');
+        $('#SalesOrder_InstallmentAmount').attr('disabled', 'disabled');
+        $('#SalesOrder_InstallmentAmount').val('');
+        $('#paymentButton').attr('disabled', 'disabled');
+        $('#btnremaindDateSetup').attr('disabled',true);
+        if (@totalScheduleRow == rowIndex)
+            $('#SalesOrder_PayAdjustment').attr('readonly', 'readonly');
+    });
+
+
+
+    $(document).ready(function () {
+        @{
+    if (TempData.ContainsKey("IsMoneyReceiptReady") && Convert.ToBoolean(TempData["IsMoneyReceiptReady"]) == true)
+    {
+        @:$.ajax({
+                        @:url: "/Report/CreditMoneyReceipt",
+                    @:type: "GET",
+                    @:dataType: "html",
+                    @:success: function (data) {
+                                @:$('#report').html(data);
+                                @:},
+                    @:error: function (err) {
+                                @:console.error(JSON.stringify(err));
+                                @:}
+                    @:});
+        }
+
+    if (TempData.ContainsKey("IsMoneyReceiptReadyByID") && Convert.ToBoolean(TempData["IsMoneyReceiptReadyByID"]) == true)
+        {
+            @:$.ajax({
+                            @:url: "/Report/CreditSalesMoneyReceiptByID",
+                        @:type: "GET",
+                        @:dataType: "html",
+                        @:success: function (data) {
+                                    @:$('#report').html(data);
+                                    @:},
+                        @:error: function (err) {
+                                    @:console.error(JSON.stringify(err));
+                                    @:}
+                        @:});
+            }
+    }
+    });
+
+</script>

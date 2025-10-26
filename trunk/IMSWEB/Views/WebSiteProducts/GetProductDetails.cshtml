@@ -1,0 +1,165 @@
+﻿@model IMSWEB.WebsiteProductViewModels
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="py-5" style="background-color:#f5f6fa;">
+    <div class="container">
+        <div class="row g-5">
+
+            <!-- LEFT: Image Gallery -->
+            <div class="col-12 col-lg-6">
+                <div class="main-image rounded-4 overflow-hidden shadow-lg mb-4">
+                    <img id="mainProductImage"
+                         src="@Model.DocumentPath"
+                         alt="@Model.Title"
+                         class="w-100 object-fit-contain" />
+                </div>
+
+                <div class="d-flex justify-content-start flex-wrap gap-3">
+                    <img src="@Model.DocumentPath"
+                         class="thumb-img active-thumb"
+                         onclick="changeImage(this)"
+                         alt="Thumbnail 1" />
+                    <img src="@Model.DocumentPath"
+                         class="thumb-img"
+                         onclick="changeImage(this)"
+                         alt="Thumbnail 2" />
+                    <img src="@Model.DocumentPath"
+                         class="thumb-img"
+                         onclick="changeImage(this)"
+                         alt="Thumbnail 3" />
+                    <img src="@Model.DocumentPath"
+                         class="thumb-img"
+                         onclick="changeImage(this)"
+                         alt="Thumbnail 4" />
+                </div>
+            </div>
+
+            <!-- RIGHT: Product Info -->
+            <div class="col-12 col-lg-6">
+                <h1 class="fw-bold mb-3 text-dark">@Model.Title</h1>
+                <p class="lead text-secondary mb-4">
+                    <i class="bi bi-cash-coin text-success me-2"></i>
+                    <strong class="text-dark">Price:</strong> ৳ @Model.Price
+                </p>
+
+                <p class="text-dark lh-lg mb-4">
+                    @Model.Description
+                </p>
+
+                <div class="mt-4">
+                    <a href="javascript:history.back()" class="btn btn-outline-primary px-4 py-2 rounded-pill hover-glow">
+                        <i class="bi bi-arrow-left-circle me-2"></i> Back to Products
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- RECOMMENDED SECTION -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold text-dark">More Products You May Like</h2>
+            <div class="underline mx-auto mt-3 mb-4"></div>
+        </div>
+        <div class="row">
+            @{ Html.RenderAction("AllProductView", "WebSiteProducts"); }
+        </div>
+    </div>
+</section>
+
+<style>
+    .underline {
+        width: 80px;
+        height: 3px;
+        background-color: #007bff;
+        border-radius: 10px;
+    }
+
+    /* Main Image */
+    .main-image {
+        width: 100%;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
+    }
+
+    .main-image img {
+        width: 100%;
+        height: auto; /* preserve full image */
+        object-fit: contain; /* prevent cropping */
+        transition: transform 0.4s ease;
+    }
+
+    .main-image:hover img {
+        transform: scale(1.05);
+    }
+
+    /* Thumbnails */
+    .thumb-img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .thumb-img:hover {
+        border-color: #007bff;
+        transform: scale(1.1);
+    }
+
+    .active-thumb {
+        border-color: #28a745;
+        box-shadow: 0 0 8px rgba(0, 128, 0, 0.3);
+    }
+
+    /* Button hover glow */
+    .hover-glow {
+        transition: all 0.3s ease;
+    }
+
+    .hover-glow:hover {
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        transform: translateY(-3px);
+    }
+
+    /* Responsive */
+    @@media (max-width: 991px) {
+        .main-image {
+            height: auto;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .thumb-img {
+            width: 60px;
+            height: 60px;
+        }
+
+        h1 {
+            font-size: 22px;
+        }
+
+        p.lead {
+            font-size: 16px;
+        }
+    }
+</style>
+
+<script>
+    function changeImage(element) {
+        const mainImg = document.getElementById("mainProductImage");
+        mainImg.src = element.src;
+
+        document.querySelectorAll(".thumb-img").forEach(img => img.classList.remove("active-thumb"));
+        element.classList.add("active-thumb");
+    }
+</script>

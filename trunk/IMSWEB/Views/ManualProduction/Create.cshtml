@@ -1,0 +1,353 @@
+﻿@model ProductionViewModel
+@using IMSWEB.Model
+@{
+    string controllerName = ViewContext.RouteData.Values["controller"].ToString();
+    string actionName = ViewContext.RouteData.Values["action"].ToString();
+    ViewBag.Title = "Add Production";
+}
+
+<h4>@ViewBag.Title</h4>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        @using (Html.BeginForm("Create", controllerName, new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.ProductionID);
+            @Html.HiddenFor(m => m.Detail.PDetailID);
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="panel">
+                                <div class="panel-body">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.ProductionCode, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.ProductionCode, new { htmlAttributes = new { @class = "input-sm form-control input-sm", @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.ProductionCode, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.Date, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            <div class='input-group date' id='Date'>
+                                                <input type='text' class="input-sm form-control input-sm" name='Date' />
+                                                <span class="input-group-addon">
+                                                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        @Html.ValidationMessageFor(m => m.Date, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="panel">
+                                <div class="panel-body">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.Detail.ProductID, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.ManualProductionPicker, id = (Model.Detail != null && Model.Detail.ProductID != null) ? Model.Detail.ProductID : 0 });
+                                            }
+                                            @Html.ValidationMessageFor(m => m.Detail.ProductID, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group" @*style=" display: none"*@>
+                                        @Html.LabelFor(m => m.Detail.ConvertValue, new { @class = "control-label col-md-4", id = "lblConvertValue" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.Detail.ConvertValue, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", tabindex = 1, @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.Detail.ConvertValue, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.Detail.ParentQuantity, new { @class = "control-label col-md-4", id = "lblParentUnit" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.Detail.ParentQuantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 1 } })
+                                            @Html.ValidationMessageFor(m => m.Detail.ParentQuantity, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group" id="divChildQuantity" @*style="display:none"*@>
+                                        @Html.LabelFor(m => m.Detail.ChildQuantity, new { @class = "control-label col-md-4", id = "lblChildUnit" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.Detail.ChildQuantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 1 } })
+                                            @Html.ValidationMessageFor(m => m.Detail.ChildQuantity, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.Detail.Quantity, new { @class = "control-label col-md-4" })
+                                        <div class="col-md-8">
+                                            @Html.EditorFor(m => m.Detail.Quantity, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(m => m.Detail.Quantity, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    @*<div class="form-group">
+                                            @Html.LabelFor(m => m.Detail.Quantity, new { @class = "control-label col-md-4" })
+                                            <div class="col-md-8">
+                                                @Html.EditorFor(m => m.Detail.Quantity, new { htmlAttributes = new { @class = "input-sm form-control text-right", @type = "number" } })
+                                                @Html.ValidationMessageFor(m => m.Detail.Quantity, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>*@
+                                    <div class="form-group pull-right">
+                                        <div class="col-sm-12">
+                                            <button type="submit" id="btnAddProduct" name="btnAddProduct" class="btn btn-sm btn-success">
+                                                <i class="fa fa-cart-plus" aria-hidden="true"></i> &nbsp;Add Product
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-md-6">
+                    <div class="panel">
+                        <div class="panel-body">
+                            <table id="DetailsTable"
+                                   data-toggle="table"
+                                   data-search="false"
+                                   data-show-refresh="false"
+                                   data-show-toggle="false"
+                                   data-show-columns="false"
+                                   data-show-export="false"
+                                   data-detail-view="true"
+                                   data-pagination="false"
+                                   data-id-field="ProductName"
+                                   data-page-list="[10, 25, 50, 100, ALL]"
+                                   data-page-size="15"
+                                   data-height="265"
+                                   class="table table-responsive table-bordered table-striped" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Sl
+                                        </th>
+                                        <th data-field="ProductName"
+                                            data-sortable="true">
+                                            @Html.DisplayNameFor(model => model.Detail.ProductName)
+                                        </th>
+                                        <th data-field="Quantity"
+                                            data-sorter="sorter"
+                                            data-sortable="true">
+                                            @Html.DisplayNameFor(model => model.Detail.Quantity)
+                                        </th>
+                                        <th>
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        int count = 1;
+                                        foreach (var item in Model.Details)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @count
+                                                </td>
+                                                <td>
+                                                    @item.ProductName
+                                                </td>
+                                                <td>
+                                                    @item.Quantity
+                                                </td>
+                                                <td>
+                                                    @*@Html.ActionLink("Edit", "EditFromView", new { id = item.ProductID, previousAction = actionName.ToLower(), IsDO = false }, new { @class = "btn btn-xs btn-info" })*@
+                                                    @Html.ActionLink("Delete", "DeleteFromView", new { id = item.ProductID, previousAction = actionName.ToLower(), IsDO = false }, new { onclick = "if(!confirm('Do you want to delete this item?')) return false;" })
+                                                </td>
+                                            </tr>
+                                            count++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="panel">
+                        <div class="panel-body">
+                            <div class="form-group pull-right">
+                                <div class="col-md-12">
+                                    <button type="submit" id="btnSave" name="btnSave" class="btn btn-sm btn-info">
+                                        <i class="fa fa-floppy-o" aria-hidden="true"></i>&nbsp; Save
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        }
+    </div>
+</div>
+
+<div class="modal" id="ErrorModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Raw Materials Stock Out</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @if (TempData.ContainsKey("RawProducStock"))
+                {
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Stock Qty</th>
+                                <th>Required Qty</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in (List<ProductWisePurchaseModel>)TempData["RawProducStock"])
+                            {
+                                <tr>
+                                    <td>@item.ProductName</td>
+                                    <td>@item.CategoryName</td>
+                                    <td>@item.StockQty</td>
+                                    <td>@item.Quantity</td>
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger btn-xs" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+         @if (TempData.ContainsKey("RawProducStock"))
+         {
+             @: $('#ErrorModal').modal("toggle");
+         }
+   $('#Date').datetimepicker({
+        @{
+                 if (Model == null || Model.Date == DateTime.MinValue) {
+                    @:defaultDate: moment(),
+                                                                                                                            }
+                else
+                {
+            @:defaultDate:'@(Convert.ToDateTime(Model.Date).ToString("dd-MMM-yyyy"))',
+                                                                                                                    }
+            @:format: 'DD-MMM-YYYY'
+                                                                                                                            }
+    });
+
+
+    });
+
+
+    //Product Add validation
+    $(document).on('click', '#btnAddProduct', function (e) {
+        var IsValid = true;
+        $(this).find("button[type='submit']").prop('disabled', true);
+
+        var productId = $("#ProductsId").val();
+        if (productId == "" || productId == undefined) {
+            toastr.error("Please select product first");
+            $("#ProductsCode").focus();
+            $("#ProductsCode").select();
+            IsValid = false;
+            return false
+        }
+
+    });
+
+    $("#Detail_ParentQuantity").on('input', function () {
+        CalculateTotalQty();
+    });
+
+    $("#Detail_ChildQuantity").on('input', function () {
+        CalculateTotalQty();
+    });
+
+    function CalculateTotalQty() {
+        var ConvertValue = getDefaultFloatIfEmpty($("#Detail_ConvertValue").val());
+        var ChildQty = getDefaultFloatIfEmpty($("#Detail_ChildQuantity").val());
+        var ParentQty = getDefaultFloatIfEmpty($("#Detail_ParentQuantity").val());
+        var TotalQty = parseFloat((ConvertValue * ParentQty) + ChildQty);
+        $("#Detail_Quantity").val(TotalQty).trigger('input');
+    }
+
+    //****************************
+    //Validation End
+    //****************************
+
+
+    //Take existing IMEI in array during Quantity change
+    //$(document).on('input', '#Detail_Quantity', function () {
+    //    var Qty = parseInt($(this).val());
+    //    var $IMEIS = $('input[id$="__IMEI"]');
+    //    var OldIMEIS = [];
+    //    if (!$IMEIS) return;
+    //    $IMEIS.each(function (i, input) {
+    //        var value = $(input).val();
+    //        if (value != "" && value != "undefined")
+    //            OldIMEIS.push(value);
+    //    });
+
+    //    var $table = $('#IMEITable tbody');
+    //    $table.empty();
+    //    var row = "";
+    //    var cols = "";
+    //    var counter = 0;
+    //    var IMEI = "";
+    //    for (var i = 0; i < Qty; i++) {
+    //        counter++;
+    //        if (OldIMEIS.length > 0 && OldIMEIS.length>i) {
+    //            IMEI = OldIMEIS[i];
+    //        }
+    //        row = $("<tr>");
+    //        cols = "";
+    //        cols += '<td>' + counter + '</td>';
+    //        cols += '<td><input type="text" class="form-control input-sm" name="Detail.ProductionIMEIs['+i+'].IMEI" value="' + IMEI + '" /></td>';
+    //        row.append(cols);
+    //        $('#IMEITable').append(row);
+    //        IMEI = "";
+    //    }
+    //});
+
+    ////Duplicate IMEI check
+    //$(document).on('blur', 'input[name*="IMEI"]', function (e) {
+    //    var $Details = $("#IMEITable").find('input[name*="IMEI"]');
+    //    var IMEIs = [];
+    //    //Take IMEI in array IMEIs
+    //    $Details.each(function (i, input) {
+    //        var IMEI = $(input).val();
+    //        if (IMEI != "")
+    //            IMEIs.push(IMEI);
+    //    });
+
+    //    //check duplication of IMEI
+    //    IMEIs = IMEIs.sort();
+    //    for (var i = 0; i < IMEIs.length-1; i++) {
+    //        if (IMEIs[i] == IMEIs[i + 1]) {
+    //            toastr.error("IMEI is already added.");
+    //            result = false;
+    //            $(this).focus();
+    //            $(this).select();
+    //            e.preventDefault();
+    //            return false; //break the loop
+    //        }
+    //    }
+    //});
+
+</script>

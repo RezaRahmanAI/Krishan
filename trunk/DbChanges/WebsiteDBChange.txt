@@ -1,0 +1,160 @@
+
+------------------------------------
+-------Date: 18-11-2023-------------
+---------------Mostafizur-----------
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[AboutUs](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Title] [nvarchar](100) NOT NULL,
+	[Description] [nvarchar](max) NULL,
+	[DocumentPath] [nvarchar](250) NULL,
+	[ConcernID] [int] NOT NULL,
+	[CreatedBy] [int] NOT NULL,
+	[CreateDate] [datetime] NOT NULL,
+	[ModifiedBy] [int] NULL,
+	[ModifiedDate] [datetime] NULL
+	
+ CONSTRAINT [PK_AboutUs] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[AboutUs]  WITH CHECK ADD  CONSTRAINT [FK_AboutUs_SisterConcerns] FOREIGN KEY([ConcernID])
+REFERENCES [dbo].[SisterConcerns] ([ConcernID])
+GO
+
+ALTER TABLE [dbo].[AboutUs] CHECK CONSTRAINT [FK_AboutUs_SisterConcerns]
+GO
+
+
+
+
+------------------------------------
+-------Date: 18-11-2023-------------
+---------------Mostafizur-----------
+
+/* To prevent any potential data loss issues, you should review this script in detail before running it outside the context of the database designer.*/
+BEGIN TRANSACTION
+SET QUOTED_IDENTIFIER ON
+SET ARITHABORT ON
+SET NUMERIC_ROUNDABORT OFF
+SET CONCAT_NULL_YIELDS_NULL ON
+SET ANSI_NULLS ON
+SET ANSI_PADDING ON
+SET ANSI_WARNINGS ON
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.WebsiteProducts
+	DROP COLUMN SubTitle
+GO
+ALTER TABLE dbo.WebsiteProducts SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+
+------------------------------------
+-------Date: 18-11-2023-------------
+---------------Mostafizur-----------
+
+/* To prevent any potential data loss issues, you should review this script in detail before running it outside the context of the database designer.*/
+BEGIN TRANSACTION
+SET QUOTED_IDENTIFIER ON
+SET ARITHABORT ON
+SET NUMERIC_ROUNDABORT OFF
+SET CONCAT_NULL_YIELDS_NULL ON
+SET ANSI_NULLS ON
+SET ANSI_PADDING ON
+SET ANSI_WARNINGS ON
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.WebsiteProducts ADD
+	Price decimal(18, 0) NOT NULL CONSTRAINT DF_WebsiteProducts_Price DEFAULT ((0))
+GO
+ALTER TABLE dbo.WebsiteProducts SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+
+
+------------------------------------
+-------Date: 18-11-2023-------------
+---------------Mostafizur-----------
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[DocumentsInfo](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[DocType] [nvarchar](150) NOT NULL,
+	[DocName] [nvarchar](250) NOT NULL,
+	[DocPath] [nvarchar](max) NOT NULL,
+	[ConcernID] [int] NOT NULL,
+	[DocSourceId] [int] NOT NULL,
+	[SourceFolder] [nvarchar](50) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[DocumentsInfo]  WITH CHECK ADD  CONSTRAINT [FK_DocumentsInfo_SisterConcerns] FOREIGN KEY([ConcernID])
+REFERENCES [dbo].[SisterConcerns] ([ConcernID])
+GO
+
+ALTER TABLE [dbo].[DocumentsInfo] CHECK CONSTRAINT [FK_DocumentsInfo_SisterConcerns]
+GO
+
+
+
+
+
+
+------------------------------------
+-------Date: 18-11-2023-------------
+---------------Mostafizur-----------
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[WebsiteProducts](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Title] [nvarchar](100) NOT NULL,
+	[SubTitle] [nvarchar](100) NULL,
+	[Description] [nvarchar](max) NULL,
+	[DocumentPath] [nvarchar](250) NULL,
+	[ConcernID] [int] NOT NULL,
+	[CreatedBy] [int] NOT NULL,
+	[CreateDate] [datetime] NOT NULL,
+	[ModifiedBy] [int] NULL,
+	[ModifiedDate] [datetime] NULL,
+	[ProcutCategory] [int] NOT NULL,
+ CONSTRAINT [PK_WebsiteProducts] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[WebsiteProducts] ADD  CONSTRAINT [DF_WebsiteProducts_ProcutCategory]  DEFAULT ((1)) FOR [ProcutCategory]
+GO
+
+ALTER TABLE [dbo].[WebsiteProducts]  WITH CHECK ADD  CONSTRAINT [FK_WebsiteProducts_SisterConcerns] FOREIGN KEY([ConcernID])
+REFERENCES [dbo].[SisterConcerns] ([ConcernID])
+GO
+
+ALTER TABLE [dbo].[WebsiteProducts] CHECK CONSTRAINT [FK_WebsiteProducts_SisterConcerns]
+GO

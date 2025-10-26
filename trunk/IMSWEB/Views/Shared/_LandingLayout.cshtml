@@ -1,0 +1,64 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - IMS</title>
+    @Styles.Render("~/IMSStyles")
+    <link href="~/Content/jquery-ui.css" rel="stylesheet" />
+</head>
+@Scripts.Render("~/IMSPreDOMScripts")
+<body>
+    <div class="wrapper">
+        <!-- Page Content  -->
+        <div id="content">
+            <div class="container-fluid">
+                @Html.Partial("~/Views/ToastrBuilder/_Toastr.cshtml")
+            </div>
+            <div class="container-fluid" style="min-height: 65vh;">
+                <div id="report"></div>
+                @RenderBody()
+            </div>
+        </div>
+
+    </div>
+    <footer>
+        <div class="footer-bottom" id="footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-5">
+                        <p class="pull-left">Krishan Agro Chemical @DateTime.Today.Year All rights reserved</p>
+                    </div>
+                    <div class="col-md-3">
+                        <p>
+                            Copyright &copy; Object Canvas Technology
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="pull-right">
+                            <ul class="nav nav-pills payments">
+                                <li><i class="fa fa-cc-visa"></i></li>
+                                <li><i class="fa fa-cc-mastercard"></i></li>
+                                <li><i class="fa fa-cc-amex"></i></li>
+                                <li><i class="fa fa-cc-paypal"></i></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+
+    @Scripts.Render("~/IMSPostDOMScripts")
+    @RenderSection("scripts", required: false)
+</body>
+</html>
+
+<script>
+
+    $(document).ready(function () {
+        
+    });
+
+</script>

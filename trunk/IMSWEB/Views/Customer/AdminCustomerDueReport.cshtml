@@ -1,0 +1,47 @@
+﻿@using IMSWEB.Model
+@model SalesOrderViewModel
+
+@{
+    ViewBag.Title = "Customer Due Report";
+}
+
+<h4>@(ViewBag.Title + ".")</h4>
+<hr />
+@using (Ajax.BeginForm("AdminCustomerDueRpt", "Report", new { ReturnUrl = ViewBag.ReturnUrl }, ajaxOptions: new AjaxOptions { HttpMethod = "Post", UpdateTargetId = "report", LoadingElementId = "spinningIcon" }, htmlAttributes: new { role = "form" }))
+{
+    <div class="col-sm-5 col-sm-offset-3">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class ="control-label col-sm-2">Concern</label>
+                    <div class="col-sm-10">
+                       @Html.DropDownList("ConcernID", @ViewBag.Concerns as SelectList, "--Select Concern--", new { @class = "form-control input-sm" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class='col-sm-10 input-group col-sm-offset-2' id='rbReportType'>
+                        <input id="rdoAll" type="radio" title="All" value="0" name="CustomerType" checked />All Customer &nbsp;&nbsp;
+                        <input id="rdoRetail" title="Retail" type="radio" value="1" name="CustomerType" />Retail &nbsp;&nbsp;
+                        <input id="rdoDealer" title="Dealer" type="radio" value="2" name="CustomerType" />Dealer &nbsp;&nbsp;
+                        <input id="rdoCredit" title="Credit" type="radio" value="3" name="CustomerType" />Credit
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class='col-sm-10 input-group col-sm-offset-2' id='rbReportType'>
+                        <label><input id="rdoOnlyDue" title="Only Due" type="checkbox" value="1" name="DueType" />Only Due</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2">
+                        <img id="spinningIcon" height="45" width="45" style="display: none;" class="pull-right" src="~/Content/images/Spinner.gif" />
+                    </div>
+                    <div class="col-sm-10">
+                        <input id="btnPreview" type="submit" value="Preview" class="btn btn-sm btn-info" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+

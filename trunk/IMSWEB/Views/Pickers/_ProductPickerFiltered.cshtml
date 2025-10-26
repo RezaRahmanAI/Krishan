@@ -1,0 +1,221 @@
+﻿<div class="input-group">
+    <input type="text" class="input-sm form-control input-sm" id="ProductDetailsCode" name="ProductDetailsCode" value="@ViewBag.ProductsCode" readonly="readonly">
+    <span class="input-group-btn">
+        <button type="button" class="btn btn-sm btn-info" onclick="GetSalesProductByCustomerID()"><i class="fa fa-plus-circle" aria-hidden="true"></i>&nbsp;Pick</button>
+    </span>
+    <input type="text" class="input-sm form-control input-sm" id="ProductDetailsName" name="ProductDetailsName" value="@ViewBag.ProductsName" readonly="readonly">
+    <input type="hidden" class="input-sm form-control input-sm" id="ProductDetailsId" name="ProductDetailsId" value="@ViewBag.ProductsId" readonly="readonly">
+    <input type="hidden" class="input-sm form-control input-sm" id="ProductsType" name="ProductType" value="@ViewBag.ProductsType" readonly="readonly">
+</div>
+
+<!-- Modal -->
+<div class="modal fade bs-example-modal-lg" id="FinGoodsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h5 class="modal-title" id="myModalLabel">Sales Products</h5>
+            </div>
+            <div class="modal-body">
+                <div id="Productstoolbar">
+                </div>
+                <table id="ProductsTable"
+                       data-toolbar="#Productstoolbar"
+                       data-toggle="table"
+                       data-search="true"
+                       data-click-to-select="true"
+                       data-single-select="true"
+                       data-detail-view="true"
+                       data-pagination="true"
+                       data-id-field="name"
+                       data-page-list="[10, 25, 50, 100, ALL]"
+                       data-page-size="6"
+                       class="table table-responsive table-bordered table-striped text-nowrap" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th data-field="state" data-checkbox="true"></th>
+                            <th data-field="ProductID" class="hidden"></th>
+                            <th data-field="SDetailID" class="hidden"></th>
+                            <th data-field="ColorName" class="hidden"></th>
+                            <th data-field="ColorID" class="hidden"></th>
+                            <th data-field="ParentUnitName" class="hidden"></th>
+                            <th data-field="ChildUnitName" class="hidden"></th>
+                            <th data-field="ConvertValue" class="hidden"></th>
+                            <th data-field="ProductType" class="hidden"></th>
+                            <th data-field="MRP" class="hidden"></th>
+
+                            <th data-field="ProductCode"
+                                data-sortable="true">
+                                Code
+                            </th>
+                            <th data-field="ProductName"
+                                data-sorter="sorter"
+                                data-sortable="true">
+                                Name
+                            </th>
+                            <th data-field="ColorName"
+                                data-sorter="sorter"
+                                data-sortable="true">
+                                Grade
+                            </th>
+                            <th data-field="CategoryName"
+                                data-sorter="sorter"
+                                data-sortable="true">
+                                Category
+                            </th>
+                            <th data-field="SizeName"
+                                data-sorter="sorter"
+                                data-sortable="true">
+                                Specification
+                            </th>
+                            <th data-field="SFTRate"
+                                data-sorter="sorter"
+                                data-sortable="true">
+                                SFT Rate
+                            </th>
+                            <th data-field="RatePerParentUnit"
+                                data-sorter="sorter"
+                                data-sortable="true">
+                                Rate/(KG,Cartoon)
+                            </th>
+                            <th data-field="ParentQuantity"
+                                data-sorter="sorter"
+                                data-sortable="true">
+                                Quantity
+                            </th>
+                            <th data-field="ParentUnitName"
+                                data-sorter="sorter"
+                                data-sortable="true">
+                                Unit
+                            </th>
+                            <th data-field="ChildQuantity"
+                                data-sorter="sorter"
+                                data-sortable="true">
+                                PCS/gm
+                            </th>
+                            <th data-field="TotalSFT"
+                                data-sorter="sorter"
+                                data-sortable="true">
+                                TotalSFT
+                            </th>
+                           
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    //************************************************************
+    //Get All Product by Work Order  to generate Product Picker
+    //************************************************************
+
+    var $Producttable = $('#ProductsTable');
+
+    function GetSalesProductByCustomerID() {
+        $Producttable.bootstrapTable('removeAll');
+        var CustomerID = getDefaultFloatIfEmpty($("#CustomersId").val());
+        if (CustomerID == 0) {
+            toastr.info('Select Customer')
+            return;
+        }
+        GetSalesProductDetailByCustomerID(CustomerID);
+    }
+
+    function GetSalesProductDetailByCustomerID(CustomerID) {
+        $.ajax({
+            url: "/Return/GetSalesProductDetailByCustomerID",
+            type: "GET",
+            data: { 'CustomerID': CustomerID },
+            dataType: "json",
+            success: function (data) {
+                PopulateProductDetailsTable(data);
+                $('#FinGoodsModal').modal('toggle');
+            },
+            error: function (err) {
+                console.log(err);
+                toastr.error("error");
+            }
+        });
+    }
+
+    //Generate product picker
+    function PopulateProductDetailsTable(data) {
+        $Producttable.bootstrapTable('load', data)
+    }
+    //************************************************************
+    //End generate Picker
+    //************************************************************
+    $Producttable.on('check.bs.table', function (e, item) {
+
+        $('[id*="_ParentQuantity"]').val(0).trigger("input");
+
+        $('#ProductDetailsCode').val($.trim(item.ProductCode));
+        $('#ProductDetailsName').val($.trim(item.ProductName));
+        $('#ProductDetailsId').val($.trim(item.ProductID));
+        $('#ProductsType').val($.trim(item.ProductType));
+        $('[id*="_Quantity"]').val($.trim(item.Quantity)).trigger("input");
+        $('#SalesCSft').val($.trim(item.SalesCSft));
+        $('#dQuantity').val($.trim(item.Quantity));
+        $('[id*="_UnitPrice"]').val($.trim(item.MRP));
+        $('[id*="_MRPRate"]').val($.trim(item.MRP)).trigger("input");
+        $('[id*="_ColorName"]').val($.trim(item.ColorName));
+        $('[id*="_ColorId"]').val($.trim(item.ColorID));
+        $('[id*="_StockDetailId"]').val($.trim(item.SDetailID));
+        $('[id*="_IMENo"]').val($.trim('No Barcode'));
+        $('[id*="_AreaPerCarton"]').val($.trim(item.PurchaseCSft));
+
+        $('[id*="lblParentUnit"]').text($.trim(item.ParentUnitName));
+        $('[id*="lblChildUnit"]').text($.trim(item.ChildUnitName));
+        $('[id*="_ConvertValue"]').val($.trim(item.ConvertValue));
+        $('[id*="lblConvertValue"]').text($.trim(item.ChildUnitName) + '/' + $.trim(item.ParentUnitName));
+        $('[id*="lblRatePerArea"]').text('Rate/' + $.trim(item.ParentUnitName));
+        $('[id*="lblTotalQty"]').text('Total ' + $.trim(item.ChildUnitName));
+        $('[id*="_PreviousStock"]').val($.trim(item.ParentQuantity));
+        if ($.trim(item.CategoryName) == "Tiles")
+        {
+            $('[id*="_RatePerArea"]').val($.trim(item.SFTRate)).trigger("input");
+            $('[id*="lblRatePerArea"]').text('Rate/SFT');
+            $("#TotalAreadiv").show();
+            $("#AreaPerCartondiv").show();
+        }
+        else
+        {
+            $('[id*="_RatePerArea"]').val($.trim(item.RatePerParentUnit)).trigger("input");
+            $("#TotalAreadiv").hide();
+            $("#AreaPerCartondiv").hide();
+        }
+        
+        if ($.trim(item.ProductType) == "2") {
+            $('[id*="_Quantity"]').attr("readonly", false);
+        }
+        else
+            $('[id*="_Quantity"]').attr("readonly", true);
+    });
+
+    $Producttable.on('uncheck.bs.table', function (e, row) {
+        ClearRawMaterials();
+    });
+
+
+    function ClearRawMaterials() {
+        $('#ProductDetailsCode').val('');
+        $('#ProductDetailsName').val('');
+        $('#ProductDetailsId').val('');
+        $('#ProductsType').val('');
+        $('[id*="_PreviousStock"]').val('');
+        $('[id*="_UnitPrice"]').val('').trigger("input");
+        $('[id*="UnitTypeName"]').text("");
+        $('[id*="lblConvertValue"]').text("");
+        $('[id*="_ConvertValue"]').val('');
+        $('[id*="Totallabel"]').text('');
+        $('[id*="_Quantity"]').val(0).trigger("input");
+        $('[id*="_ColorId"]').val('');
+    }
+
+</script>

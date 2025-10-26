@@ -1,0 +1,828 @@
+﻿@using IMSWEB.Model
+@model IMSWEB.CreateCashCollectionViewModel
+
+
+
+@{
+    string actionName = ViewContext.RouteData.Values["action"].ToString();
+    ViewBag.Title = actionName + " Cash Collection";
+}
+
+<style>
+    #invoiceList {
+        position: absolute;
+        z-index: 1000;
+        background-color: white;
+        border: 1px solid #ccc;
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+    }
+
+        #invoiceList li {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+            #invoiceList li:hover {
+                background-color: #f0f0f0;
+            }
+</style>
+
+<h4 class="inline-header">@(ViewBag.Title + ".")</h4>
+@using (Html.BeginForm(actionName, "CashCollection", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", enctype = "multipart/form-data", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.CashCollectionID)
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.ReceiptNo, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.ReceiptNo, new { htmlAttributes = new { @class = "form-control input-sm", tabindex = 1, @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(model => model.ReceiptNo, "", new { @class = "text-danger" })
+                                    <input type="hidden" value="" id="txtPayType" name="PayType" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.EntryDate, htmlAttributes: new { @class = "control-label col-md-3", autofocus = "autofocus" })
+                                <div class="col-md-9">
+                                    @*@Html.EditorFor(model => model.EntryDate, new { htmlAttributes = new { @class = "form-control input-sm" } })*@
+                                    <div class='input-group date' id='EntryDate' tabindex="2">
+                                        @if (User.IsInRole("Mobile User"))
+                                        {
+                                            <input type='text' class="input-sm form-control input-sm" readonly name='EntryDate' />
+                                        }
+                                        else
+                                        {
+                                            <input type='text' class="input-sm form-control input-sm" name='EntryDate' />
+                                        }
+
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                                        </span>
+                                    </div>
+                                    @Html.ValidationMessageFor(model => model.EntryDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.CustomerID, new { @class = "control-label col-md-3" })
+                                        <div class="col-md-9">
+                                            @Html.DropDownListFor(model => model.CustomerID, new SelectList(ViewBag.CustomerIds, "Id", "Name"), "--Select Customer--", new { @class = "form-control input-sm ddl2", @id = "txtCustomerId" })
+                                            @Html.ValidationMessageFor(model => model.CustomerID, "", new { @class = "text-danger" })
+                                            @Html.HiddenFor(m => m.CustomerID, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        @Html.LabelFor(model => model.Type, htmlAttributes: new { @class = "control-label col-md-3" })
+                                        <div class="col-md-9">
+                                            @Html.EnumDropDownListFor(model => model.Type, "--Select Trans. Type--", new { @class = "form-control input-sm", autofocus = "autofocus" })
+                                            @Html.ValidationMessageFor(model => model.Type, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        @Html.LabelFor(m => m.InvoiceNo, new { @class = "control-label col-md-3" })
+                                        <div class="col-md-9">
+                                            @Html.EditorFor(m => m.InvoiceNo, "--Select--", new { htmlAttributes = new { @class = "input-sm form-control input-sm", autofocus = "autofocus" } })
+                                            @Html.HiddenFor(m => m.SOrderID, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @*<div class="form-group">
+                                        @Html.LabelFor(model => model.CustomerID, htmlAttributes: new { @class = "control-label col-md-3" })
+                                        <div class="col-md-9">
+                                            @Html.EditorFor(model => model.CustomerID, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                            @Html.ValidationMessageFor(model => model.CustomerID, "", new { @class = "text-danger" })
+
+                                        </div>
+                                    </div>*@
+
+
+
+
+                                <div class="col-md-2" style="display: none;">
+                                    <div class="form-group">
+                                        <div class="col-md-9">
+                                            @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.ExceptCreditCustomer, id = (Model != null && Model.CustomerID != null) ? Model.CustomerID : "0" });}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.PayHeadId, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.DropDownListFor(model => model.PayHeadId, Model.PayItems, "--Select a Particular--", new { @class = "form-control input-sm ddl2", @id = "PayHeadId" })
+                                    @Html.ValidationMessageFor(model => model.PayHeadId, "", new { @class = "text-danger" })
+                                    @if (actionName.ToLower().Equals("edit"))
+                                    {
+                                        @Html.HiddenFor(d => d.PayHeadId)}
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.InvNetTotal, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.InvNetTotal, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(model => model.InvNetTotal, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.InvoiceDue, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.InvoiceDue, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(model => model.InvoiceDue, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.CashBPercentage, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.CashBPercentage, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 9 } })
+
+                                    @Html.ValidationMessageFor(model => model.CashBPercentage, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="display: none">
+                                @Html.LabelFor(model => model.CashBAmt, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.CashBAmt, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 9 } })
+
+                                    @Html.ValidationMessageFor(model => model.CashBAmt, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.YearlyBPercentage, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.YearlyBPercentage, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 9 } })
+
+                                    @Html.ValidationMessageFor(model => model.YearlyBPercentage, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="display: none">
+                                @Html.LabelFor(model => model.YearlyBnsAmt, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.YearlyBnsAmt, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 9 } })
+
+                                    @Html.ValidationMessageFor(model => model.YearlyBnsAmt, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.Amount, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.Amount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 9 } })
+                                    @Html.HiddenFor(model => model.TempAmount, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 9 } })
+                                    @Html.ValidationMessageFor(model => model.Amount, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+
+                            <div class="form-group" style="display: none;">
+                                @Html.LabelFor(model => model.PaymentType, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.DropDownListFor(model => model.PaymentType, new SelectList(Enum.GetValues(typeof(IMSWEB.Model.EnumPayType))), new { @class = "form-control input-sm", tabindex = 5 })
+                                    @Html.ValidationMessageFor(model => model.PaymentType, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.CurrentDue, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.CurrentDue, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(model => model.CurrentDue, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.BalanceDue, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.BalanceDue, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 11, @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(model => model.BalanceDue, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.InvRemainingDue, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.InvRemainingDue, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 11, @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(model => model.InvRemainingDue, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.TotalDisAmt, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.TotalDisAmt, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 11, @readonly = "readonly" } })
+                                    @Html.ValidationMessageFor(model => model.TotalDisAmt, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.AdjustAmt, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.AdjustAmt, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", tabindex = 10 } })
+                                    @Html.ValidationMessageFor(model => model.AdjustAmt, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            @if (ViewBag.IsEmployeeWiseTransEnable && (User.IsInRole(EnumUserRoles.Admin.ToString())
+                            || User.IsInRole(EnumUserRoles.superadmin.ToString())
+                            || User.IsInRole(EnumUserRoles.LocalAdmin.ToString())
+                            || User.IsInRole(EnumUserRoles.Manager.ToString())
+                            || User.IsInRole(EnumUserRoles.RetailManager.ToString()))
+)
+                            {
+                                @Html.HiddenFor(m => m.EmployeeID)
+                                <input type="hidden" name="EmpIdtmp" id="tmpEmpId" value="@Model.EmployeeID" />
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.EmpName, htmlAttributes: new { @class = "control-label col-md-3", @id = "EmployeeName" })
+                                    <div class="col-md-9">
+                                        @if (User.IsInRole(EnumUserRoles.MobileUser.ToString()))
+                                        {
+                                            @Html.EditorFor(model => model.EmpName, new { htmlAttributes = new { @class = "form-control input-sm", tabindex = 10, @readonly = "readonly" } })
+                                        }
+                                        else
+                                        {
+                                            @Html.EditorFor(model => model.EmpName, new { htmlAttributes = new { @class = "form-control input-sm", tabindex = 10 } })
+
+                                        }
+                                        @Html.ValidationMessageFor(model => model.EmpName, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.CurrentEmpDue, htmlAttributes: new { @class = "control-label col-md-3" })
+                                    <div class="col-md-9">
+                                        @Html.EditorFor(model => model.CurrentEmpDue, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+                                        @Html.ValidationMessageFor(model => model.CurrentEmpDue, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.EmpDueBalance, htmlAttributes: new { @class = "control-label col-md-3" })
+                                    <div class="col-md-9">
+                                        @Html.EditorFor(model => model.EmpDueBalance, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", tabindex = 11, @readonly = "readonly" } })
+                                        @Html.ValidationMessageFor(model => model.EmpDueBalance, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            }
+
+
+                            @*<div class="form-group">
+                                    @Html.LabelFor(model => model.CCBankID, new { @class = "control-label col-md-3", autofocus = "autofocus" })
+                                    <div class="col-md-9">
+                                        @{Html.RenderAction("RenderPicker", "Picker", new { pickerType = PickerType.CCBank, id = (Model != null && Model.CCBankID != null) ? Model.CCBankID : "0" });}
+                                        @Html.ValidationMessageFor(model => model.CCBankID, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.AccountNo, htmlAttributes: new { @class = "control-label col-md-3" })
+                                    <div class="col-md-9">
+                                        @Html.EditorFor(model => model.AccountNo, new { htmlAttributes = new { @class = "form-control input-sm", tabindex = 4 } })
+                                        @Html.ValidationMessageFor(model => model.AccountNo, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>*@
+                            <div class="form-group">
+                                <label class="control-label col-md-3">Remind Date:</label>
+                                <div class="col-md-9">
+                                    <div class='input-group date' id='RemindDate'>
+                                        <input type='text' class="input-sm form-control input-sm" name='RemindDate' id="RemindDate" />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.Remarks, htmlAttributes: new { @class = "control-label col-md-3" })
+                                <div class="col-md-9">
+                                    @Html.EditorFor(model => model.Remarks, new { htmlAttributes = new { @class = "input-sm form-control", tabindex = 10 } })
+                                    @Html.ValidationMessageFor(model => model.Remarks, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-md-9 col-md-offset-3 pull-right">
+                                    @Html.EditorFor(model => model.IsSmsEnable, new { htmlAttributes = new { @class = "form-check-input" } })
+                                    @Html.LabelFor(model => model.IsSmsEnable, htmlAttributes: new { @class = "form-check-label" })
+                                    @Html.ValidationMessageFor(model => model.IsSmsEnable, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-9 col-md-offset-3 pull-right">
+                                    <input type="submit" value="Add Payment Transaction" class="btn btn-sm btn-primary" tabindex="12" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    $(document).ready(function () {
+        $('[id*="CurrentDue"]').val(@ViewBag.SuppliersCurrentDue);
+        //$('[id*="_CurrentDue"]').trigger("input");
+        disablepicker();
+
+        $('#RemindDate').datetimepicker({
+            defaultDate: moment(),
+            format: 'DD-MMM-YYYY'
+        });
+
+        initAutoComplete();
+
+
+        $('#Type').change(function () {
+            var selectedType = $(this).val();
+            if (selectedType != 3) {
+                $('#AdjustAmt').removeAttr("readonly");
+                $('#InvoiceNo').removeAttr("readonly");
+                $('#CashBPercentage').removeAttr("readonly");
+                $('#YearlyBPercentage').removeAttr("readonly");
+            } else {
+                $('#AdjustAmt').attr("readonly", true);
+                $('#InvoiceNo').attr("readonly", true);
+                $('#CashBPercentage').attr("readonly", true);
+                $('#YearlyBPercentage').attr("readonly", true);
+            }
+        });
+
+    });
+
+    $(document).on('change', '#EmpName', function () {
+        if ($('#EmpName').val() == '' || $('#EmpName').val() == null) {
+            $('#CurrentEmpDue').val('');
+            $('#EmpDueBalance').val('');
+        }
+    });
+
+    $(function () {
+        $("#PaymentTransaction").select2();
+        $('#EntryDate').datetimepicker({
+            @{
+                if (Model == null || Model.EntryDate == null)
+                {
+                    @:defaultDate: moment(),
+                                                                                        }
+                else
+                {
+            @:defaultDate: '@(Convert.ToDateTime(Model.EntryDate).ToString("dd-MMM-yyyy"))',
+                                                                                }
+            @:format: 'DD-MMM-YYYY'
+                                                                                        }
+        });
+
+    });
+
+    $("#CustomersModal").on("hidden.bs.modal", function () {
+        Calculation();
+        @if(User.IsInRole(EnumUserRoles.MobileUser.ToString()))
+            {
+                @: getEmployeeWiseCustomerDue();
+            }
+
+    });
+
+    $('#PayHeadId').change(function () {
+        getPayType();
+    });
+
+    function getPayType() {
+        var selectedOption = $('#PayHeadId').find('option:selected').text();
+        var lastHyphenIndex = selectedOption.lastIndexOf('-');
+        var textAfterLastHyphen = selectedOption.slice(lastHyphenIndex + 1);
+        textAfterLastHyphen = $.trim(textAfterLastHyphen);
+        $('#txtPayType').val(textAfterLastHyphen);
+    }
+
+    $(document).ready(function () {
+        getPayType();
+    });
+
+    function initAutoComplete() {
+        $('#EmpName').autocomplete({
+            source: function (request, response) {
+
+                $('#EmpName').val("");
+                var customerId = $('#CustomerID').val();
+                if (customerId === 0 || customerId == null || customerId == '') {
+                    toastr.error("Please select customer first");
+                    return;
+                }
+                ihelper.get("/Employee/GetEmployeesWithDueByNameAndCustomer", { prefix: request.term, customerId: customerId }, function (data) {
+                    if (data == false) {
+                        toastr.error("No employee found!");
+                        return;
+                    }
+                    response($.map(data, function (item) {
+                        return { label: item.Name, value: item.Name, Id: item.Id, Due: item.Due };
+                    }))
+                });
+            },
+            minLength: 0,
+            select: function (event, ui) {
+                $('#CurrentEmpDue').val('');
+                $('#EmpDueBalance').val('');
+
+                $('#EmployeeID').val(ui.item.Id);
+                $('#CurrentEmpDue').val(ui.item.Due);
+                $('#EmpDueBalance').val(ui.item.Due);
+                Calculation();
+            },
+            maxShowItems: 5
+        });
+    }
+
+    function getEmployeeWiseCustomerDue() {
+
+        var customerId = $('#CustomerID').val();
+        if (customerId === 0 || customerId == null || customerId == '') {
+            toastr.error("Please select customer first");
+            return;
+        }
+
+        ihelper.get("/Employee/GetEmployeesWithDueByCustomer", {customerId: customerId }, function (data) {
+            if (data == false) {
+                toastr.error("No employee found!");
+                return;
+            }
+
+            $('#EmployeeID').val(data.data.Id);
+            $('#CurrentEmpDue').val(data.data.Due);
+            $('#EmpDueBalance').val(data.data.Due);
+
+        });
+    }
+
+
+    //====================== Cash Bonus + Yearly Bonus=======================
+
+    @*<div class="col-md-12">
+    <div class="form-group">
+        @Html.LabelFor(m => m.InvoiceNo, new { @class = "control-label col-md-3" })
+        <div class="col-md-9">
+            @Html.EditorFor(m => m.InvoiceNo, "--Select--", new { htmlAttributes = new { @class = "input-sm form-control input-sm", autofocus = "autofocus" } })
+            @Html.HiddenFor(m => m.SOrderID, new { htmlAttributes = new { @class = "input-sm form-control input-sm text-right", type = "number", step = "0.01", @readonly = "readonly" } })
+        </div>
+    </div>
+</div>*@
+
+
+    function updateTotalDiscountAmount() {
+
+        var InvNetTotal = getDefaultFloatIfEmpty($("#InvNetTotal").val())
+        var totalAmount = getDefaultFloatIfEmpty($("#InvoiceDue").val());
+        var adjustment = getDefaultFloatIfEmpty($("#AdjustAmt").val());
+
+
+        var cashBPercentage = getDefaultFloatIfEmpty($("#CashBPercentage").val());
+        var yearlyBPercentage = getDefaultFloatIfEmpty($("#YearlyBPercentage").val());
+
+
+
+        var cashBDiscount = getDefaultFloatIfEmpty((InvNetTotal * cashBPercentage) / 100).toFixed(2);
+        var remainingAfterCashB = (InvNetTotal - cashBDiscount).toFixed(2);
+
+
+        if (cashBPercentage > 0) {
+            $("#CashBAmt").val(cashBDiscount);
+            $("#AfterCashAmt").val(remainingAfterCashB);
+        } else {
+            $("#CashBAmt").val("0");
+            $("#AfterCashAmt").val("0");
+        }
+
+
+        var yearlyBDiscount = getDefaultFloatIfEmpty((remainingAfterCashB * yearlyBPercentage) / 100).toFixed(2);
+        var remainingAfterYear = (remainingAfterCashB - yearlyBDiscount).toFixed(2);
+
+
+        if (yearlyBPercentage > 0) {
+            $("#YearlyBnsAmt").val(yearlyBDiscount);
+            $("#AfterYearlyAmt").val(remainingAfterYear);
+        } else {
+            $("#YearlyBnsAmt").val("0");
+            $("#AfterYearlyAmt").val("0");
+        }
+
+
+        var totalDiscountAmount = (
+            parseFloat(cashBDiscount) + parseFloat(yearlyBDiscount) + parseFloat(adjustment)
+        ).toFixed(2);
+
+
+
+        calculateVariousValue(totalDiscountAmount);
+    }
+
+
+
+    function calculateVariousValue(totalDiscountAmount) {
+
+        var grandTotalAmount = getDefaultFloatIfEmpty($("#CurrentDue").val());
+        var invoiceDueAmt = getDefaultFloatIfEmpty($("#InvoiceDue").val());
+        var adjAmount = getDefaultFloatIfEmpty($("#AdjustAmt").val());
+        var recieveAmount = getDefaultFloatIfEmpty($("#Amount").val());
+        var invoiceNo = $("#InvoiceNo").val().trim();
+
+
+        var updatedTotalAmount = ((grandTotalAmount - parseFloat(totalDiscountAmount)) - recieveAmount).toFixed(2);
+        var invRemaining = invoiceDueAmt - totalDiscountAmount - recieveAmount;
+
+        $("#BalanceDue").val(updatedTotalAmount);
+        if (invoiceNo) {
+            var invRemaining = (invoiceDueAmt - totalDiscountAmount - recieveAmount).toFixed(2);
+            $("#InvRemainingDue").val(invRemaining);
+        }
+    }
+
+    $("#CashBPercentage").on("input", function () {
+        updateTotalDiscountAmount();
+    });
+
+    $("#YearlyBPercentage").on("input", function () {
+        updateTotalDiscountAmount();
+    });
+
+    $("#AdjustAmt").on("input", function () {
+        updateTotalDiscountAmount();
+    });
+
+    $("#Amount").on("input", function () {
+        updateTotalDiscountAmount();
+    });
+
+    // End ==================================================================
+
+
+    //$(document).ready(function () {
+
+    //    $('#InvoiceNo').autocomplete({
+    //        source: function (request, response) {
+    //            var customerId = $('#CustomerID').val();
+
+    //            if (customerId === "") {
+    //                toastr.error("Please select customer");
+    //                return;
+    //            }
+
+    //            $.ajax({
+    //                url: '/SalesOrder/GetCustomerSalesById',
+    //                type: 'GET', // Change to GET
+    //                dataType: 'json',
+    //                data: {
+    //                    customerId: customerId,
+    //                },
+    //                success: function (data) {
+    //                    console.log(data)
+    //                    if (data.length > 0) {
+    //                        response($.map(data, function (item) {
+    //                            return {
+    //                                label: item.InvoiceNo,
+    //                                value: item.InvoiceNo,
+    //                                SOrderID: item.SOrderID,
+    //                                PaymentsDue: item.PaymentsDue,
+    //                                NetTotal: item.NetTotal
+    //                            };
+    //                        }));
+    //                    } else {
+    //                        toastr.error("No invoices found");
+    //                    }
+    //                },
+    //                error: function (xhr, status, error) {
+    //                    toastr.error("Failed to load invoices. Status: " + status);
+    //                    console.log(xhr.responseText);
+    //                }
+    //            });
+    //        },
+    //        minLength: 0,
+    //        select: function (event, ui) {
+    //            alert('f')
+    //            console.log("NetTotal:", ui.item.NetTotal);
+    //            $('#InvoiceNo').val(ui.item.value);
+    //            $('#SOrderID').val(ui.item.SOrderID);
+    //            $('#InvoiceDue').val(ui.item.PaymentsDue);
+    //            $('#InvRemainingDue').val(ui.item.PaymentsDue);
+    //            $('#InvNetTotal').val(ui.item.NetTotal);
+    //        },
+    //        maxShowItems: 5
+    //    }).focus(function () {
+    //        $(this).autocomplete("search");
+    //    });
+    //});
+
+
+    //function Calculation() {
+    //    var totalDue = getDefaultFloatIfEmpty($("#CurrentDue").val());
+    //    var amount = getDefaultFloatIfEmpty($("#Amount").val());
+    //    var InterestAmt = getDefaultFloatIfEmpty($("#InterestAmt").val());
+    //    var Tempamount = getDefaultFloatIfEmpty($("#TempAmount").val());
+    //    var AdjustAmt = getDefaultFloatIfEmpty($("#AdjustAmt").val());
+    //    var TempAdjustAmt = getDefaultFloatIfEmpty($("#TempAdjustAmt").val());
+    //    totalDue = totalDue + Tempamount + TempAdjustAmt;
+    //    var total = (totalDue - (amount + AdjustAmt - InterestAmt)).toFixed(2);
+
+    //    $("#BalanceDue").val(getDefaultFloatIfEmpty(total));
+    //}
+    function Calculation() {
+        debugger;
+        var totalDue = getDefaultFloatIfEmpty($("#CurrentDue").val());
+        var amount = getDefaultFloatIfEmpty($("#Amount").val());
+        var Tempamount = getDefaultFloatIfEmpty($("#TempAmount").val());
+        var AdjustAmt = getDefaultFloatIfEmpty($("#AdjustAmt").val());
+        var TempAdjustAmt = getDefaultFloatIfEmpty($("#TempAdjustAmt").val());
+        var offeramount = getDefaultFloatIfEmpty($("#OfferAmt").val());
+        var TempOfferamount = getDefaultFloatIfEmpty($("#TempOfferAmt").val());
+        var bonusamount = getDefaultFloatIfEmpty($("#BonusAmt").val());
+        var TempBonusamount = getDefaultFloatIfEmpty($("#TempBonusAmt").val());
+
+        var currentEmpDue = getDefaultFloatIfEmpty($('#CurrentEmpDue').val());
+
+
+        @if (actionName.ToLower().Equals("edit"))
+        {
+            @:var prevEmpId = getDefaultFloatIfEmpty($("#tmpEmpId").val());
+            @:var currentEmpId = getDefaultFloatIfEmpty($("#EmployeeID").val());
+            @:if (prevEmpId != currentEmpId) {
+            @:  totalDue = totalDue + TempAdjustAmt + TempOfferamount + TempBonusamount;
+            @:  currentEmpDue = currentEmpDue + TempAdjustAmt + TempOfferamount + TempBonusamount;
+            @:} else {
+            @:  totalDue = totalDue + Tempamount + TempAdjustAmt + TempOfferamount + TempBonusamount;
+            @:  currentEmpDue = currentEmpDue + Tempamount + TempAdjustAmt + TempOfferamount + TempBonusamount;
+            @:}
+        }
+        else
+        {
+            @:totalDue = totalDue + Tempamount + TempAdjustAmt + TempOfferamount + TempBonusamount;
+        }
+
+        var total = (totalDue - (amount + AdjustAmt + offeramount + bonusamount)).toFixed(2);
+
+
+
+        //emp due part
+
+        var totalEmpDue = (currentEmpDue - (amount + AdjustAmt + offeramount + bonusamount)).toFixed(2);
+
+        $("#BalanceDue").val(getDefaultFloatIfEmpty(total));
+        $("#EmpDueBalance").val(getDefaultFloatIfEmpty(totalEmpDue));
+    }
+   //$("#Amount").on("input", function () {
+   //     Calculation();
+   // });
+
+   // $("#AdjustAmt").on("input", function () {
+   //     Calculation();
+   // });
+   // $("#InterestAmt").on("input", function () {
+   //     Calculation();
+   // });
+
+   // $("#OfferAmt").on("input", function () {
+   //     Calculation();
+   // });
+
+   // $("#BonusAmt").on("input", function () {
+   //     Calculation();
+   // });
+    $("#TransactionType").on("change", disablepicker);
+
+    function disablepicker() {
+        var type = $("#TransactionType option:selected").text();
+        var customer = $("button[data-target = #CustomersModal]");
+        var supplier = $("button[data-target = #SuppliersModal]");
+
+        //if (type == "FromCustomer")
+        //{
+        //    customer.removeAttr('disabled');
+        //    supplier.attr('disabled', 'disabled');
+        //}
+        //else
+        //{
+        //    supplier.removeAttr('disabled');
+        //    customer.attr('disabled', 'disabled');
+        //}
+    }
+
+    //******************************************************
+    //           Data populate with new picker
+    //******************************************************
+    $('#txtCustomerId').change(function () {
+        var cusId = getDefaultIntIfEmpty($(this).val());
+        if (cusId > 0) {
+            loadCustomerInfo(cusId);
+
+        }
+    });
+
+    function loadCustomerInfo(customerId) {
+        $.ajax({
+            url: "/SalesOrder/GetCustomerInfoById",
+            type: "GET",
+            data: { 'customerId': customerId },
+            dataType: "json",
+            success: function (customer) {
+                //alert(customer.Id)
+                $('#CustomersCode').val($.trim(customer.Code));
+                $('#CustomersName').val($.trim(customer.Name));
+                $('[id*="CustomerID"]').val($.trim(customer.Id)).trigger("input");
+                $('[id*="CurrentDue"]').val($.trim(customer.TotalDue));
+                $('[id*="BalanceDue"]').val($.trim(customer.TotalDue));
+
+            },
+            error: function (err) {
+                toastr.error(JSON.stringify(err));
+                console.log(JSON.stringify(err))
+            }
+        });
+    }
+
+
+    $(document).ready(function () {
+        $('#InvoiceNo').autocomplete({
+            source: function (request, response) {
+                var customerId = $('#CustomerID').val();
+
+                if (customerId === "") {
+                    toastr.error("Please select customer");
+                    return;
+                }
+
+                $.ajax({
+                    url: '/SalesOrder/GetCustomerSalesById',
+                    type: 'GET', // Change to GET
+                    dataType: 'json',
+                    data: {
+                        customerId: customerId,
+                    },
+                    success: function (data) {
+                        if (data.length > 0) {
+                            response($.map(data, function (item) {
+                                return {
+                                    label: item.InvoiceNo,
+                                    value: item.InvoiceNo,
+                                    SOrderID: item.SOrderID,
+                                    PaymentsDue: item.PaymentsDue,
+                                    NetTotal: item.NetTotal
+                                };
+                            }));
+                        } else {
+                            toastr.error("No invoices found");
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        toastr.error("Failed to load invoices. Status: " + status);
+                        console.log(xhr.responseText);
+                    }
+                });
+            },
+            minLength: 0,
+            select: function (event, ui) {
+                //console.log('Hello')
+                $('#InvoiceNo').val(ui.item.value);
+                $('#SOrderID').val(ui.item.SOrderID);
+                $('#InvoiceDue').val(ui.item.PaymentsDue);
+                $('#InvRemainingDue').val(ui.item.PaymentsDue);
+                $('#InvNetTotal').val(ui.item.NetTotal);
+            },
+            maxShowItems: 5
+        }).focus(function () {
+            $(this).autocomplete("search");
+        });
+    });
+
+
+
+
+
+</script>
+
