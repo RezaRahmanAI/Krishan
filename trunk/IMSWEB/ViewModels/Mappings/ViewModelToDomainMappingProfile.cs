@@ -707,8 +707,14 @@ namespace IMSWEB
 
             #region WebsiteProducts,WEbsiteProductViewModel
             CreateMap<WebsiteProductViewModels, WebsiteProducts>()
+                .ForMember(vm => vm.Id, map => map.MapFrom(m => string.IsNullOrWhiteSpace(m.Id) ? 0 : Convert.ToInt32(m.Id)))
                 .ForMember(vm => vm.Title, map => map.MapFrom(m => m.Title))
-                .ForMember(vm => vm.Description, map => map.MapFrom(m => m.Description));
+                .ForMember(vm => vm.Description, map => map.MapFrom(m => m.Description))
+                .ForMember(vm => vm.DocumentPath, map => map.MapFrom(m => m.DocumentPath))
+                .ForMember(vm => vm.Price, map => map.MapFrom(m => m.Price))
+                .ForMember(vm => vm.ProcutCategory, map => map.MapFrom(m => (int)m.ProcutCategory))
+                .ForMember(vm => vm.ConcernID, map => map.MapFrom(m => string.IsNullOrWhiteSpace(m.ConcernID) ? 0 : Convert.ToInt32(m.ConcernID)))
+                .ForMember(vm => vm.CreateDate, map => map.MapFrom(m => m.CreateDate));
             #endregion
 
             #region CashAccountVM, CashAccount

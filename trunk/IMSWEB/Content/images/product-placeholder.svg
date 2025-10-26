@@ -1,0 +1,15 @@
+<svg width="320" height="240" viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Product image placeholder">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#22c55e" stop-opacity="0.25"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="240" rx="32" fill="url(#grad)"/>
+  <g fill="none" stroke="#0f172a" stroke-opacity="0.35" stroke-width="4">
+    <rect x="68" y="68" width="184" height="120" rx="18"/>
+    <path d="M96 166l48-56 42 48 30-32 20 24" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="208" cy="104" r="16"/>
+  </g>
+  <text x="50%" y="210" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="18" fill="#1f2937" fill-opacity="0.65">Imagery coming soon</text>
+</svg>

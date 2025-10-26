@@ -253,17 +253,19 @@ namespace IMSWEB.Controllers
         [HttpGet]
         [AllowAnonymous]
         public async Task<JsonResult> CateGoryWiseProductView(int category)
-        {            
-            var allProductsAsync = await _websiteProductService.GetAllCategoryProductAsync(category);        
-            return Json(allProductsAsync, JsonRequestBehavior.AllowGet);
+        {
+            var allProductsAsync = await _websiteProductService.GetAllCategoryProductAsync(category);
+            var vmodel = _mapper.Map<IEnumerable<WebsiteProducts>, IEnumerable<WebsiteProductViewModels>>(allProductsAsync);
+            return Json(vmodel, JsonRequestBehavior.AllowGet);
         }
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<JsonResult> GetAllProduct() 
+        public async Task<JsonResult> GetAllProduct()
         {
-            var allProductsAsync = await _websiteProductService.GetAllProductAsync();         
-            return Json(allProductsAsync, JsonRequestBehavior.AllowGet);
+            var allProductsAsync = await _websiteProductService.GetAllProductAsync();
+            var vmodel = _mapper.Map<IEnumerable<WebsiteProducts>, IEnumerable<WebsiteProductViewModels>>(allProductsAsync);
+            return Json(vmodel, JsonRequestBehavior.AllowGet);
         }
 
 

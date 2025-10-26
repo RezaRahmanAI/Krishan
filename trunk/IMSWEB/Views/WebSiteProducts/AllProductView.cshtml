@@ -252,8 +252,14 @@
     function renderProducts(products) {
         var container = $("#hideForCategoryProduct");
         container.empty();
-        if (products && products.length > 0) {
-            var randomItems = products.sort(function () { return 0.5 - Math.random(); }).slice(0, 9);
+
+        if (products && products.length) {
+            var sortedItems = products.slice().sort(function (a, b) {
+                var dateA = new Date(a.CreateDate || a.createDate || a.createdDate);
+                var dateB = new Date(b.CreateDate || b.createDate || b.createdDate);
+                return (isNaN(dateB) ? 0 : dateB.getTime()) - (isNaN(dateA) ? 0 : dateA.getTime());
+            }).slice(0, 9);
+
             var delay = 0;
             randomItems.forEach(function (item) {
                 var delayStr = delay.toFixed(1);
@@ -282,10 +288,10 @@
     function loadProductsByCategory(category, element) {
         setActiveFilter(element);
         $.ajax({
-            url: "/WebSiteProducts/CateGoryWiseProductView",
-            type: "GET",
+            url: '/WebSiteProducts/CateGoryWiseProductView',
+            type: 'GET',
             data: { category: category },
-            dataType: "json",
+            dataType: 'json',
             success: function (data) {
                 renderProducts(data);
             },
@@ -298,9 +304,9 @@
     function loadAllProductsBy(element) {
         setActiveFilter(element);
         $.ajax({
-            url: "/WebSiteProducts/GetAllProduct",
-            type: "GET",
-            dataType: "json",
+            url: '/WebSiteProducts/GetAllProduct',
+            type: 'GET',
+            dataType: 'json',
             success: function (data) {
                 renderProducts(data);
             },

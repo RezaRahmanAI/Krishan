@@ -15,34 +15,20 @@ namespace IMSWEB.Data
 
         public static async Task<IEnumerable<WebsiteProducts>> GetAllWebsiteProductAsync(this IBaseRepository<WebsiteProducts> _websiteProductRepository)
         {
-            return await _websiteProductRepository.GetAll().ToListAsync();
+            return await _websiteProductRepository.GetAll()
+                .Include(t => t.SisterConcern)
+                .OrderByDescending(t => t.CreateDate)
+                .ToListAsync();
         }
 
 
         public static async Task<IEnumerable<WebsiteProducts>> GetAllCategoryProductAsync(this IBaseRepository<WebsiteProducts> _websiteRepository, int category)
         {
-            var data = await _websiteRepository.GetAll()
+            return await _websiteRepository.GetAll()
+                .Include(t => t.SisterConcern)
                 .Where(t => t.ProcutCategory == category)
-                .Select(t => new
-                {
-                    Id = t.Id,
-                    Title = t.Title,
-                    Description = t.Description,
-                    Price = t.Price,
-                    DocumentPath = t.DocumentPath,
-                })
+                .OrderByDescending(t => t.CreateDate)
                 .ToListAsync();
-           
-            var result = data.Select(t => new WebsiteProducts
-            {
-                Id = t.Id,
-                Title = t.Title,
-                Description = t.Description,
-                Price = t.Price,
-                DocumentPath = t.DocumentPath
-            }).ToList();
-
-            return result;
         }
 
         public static IQueryable<WebsiteProducts> GetAllProductIQueryables(this IBaseRepository<WebsiteProducts> productRepository, int category)
@@ -60,8 +46,11 @@ namespace IMSWEB.Data
         }
 
         public static IEnumerable<WebsiteProducts> GetAllProductAsync(this IBaseRepository<WebsiteProducts> _websiteProductRepository)
-        { 
-            return _websiteProductRepository.GetAll().ToList();
+        {
+            return _websiteProductRepository.GetAll()
+                .Include(t => t.SisterConcern)
+                .OrderByDescending(t => t.CreateDate)
+                .ToList();
         }
 
 
