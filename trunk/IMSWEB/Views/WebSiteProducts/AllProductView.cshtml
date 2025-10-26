@@ -7,10 +7,7 @@
 @using System.Globalization
 @using System.Linq
 @{
-    var productSamples = (Model ?? Enumerable.Empty<IMSWEB.WebsiteProductViewModels>())
-        .OrderByDescending(x => x.CreateDate)
-        .Take(9)
-        .ToList();
+    var productSamples = Model?.OrderBy(x => Guid.NewGuid()).Take(9).ToList() ?? new List<IMSWEB.WebsiteProductViewModels>();
 }
 
 <style>
@@ -214,25 +211,24 @@
     </div>
 
     <div class="row g-4" id="hideForCategoryProduct">
-        @if (productSamples != null && productSamples.Any())
+        @if (productSamples.Any())
         {
             for (var index = 0; index < productSamples.Count; index++)
             {
                 var item = productSamples[index];
                 var delayStr = (index * 0.1).ToString("0.0", CultureInfo.InvariantCulture);
-                var imagePath = string.IsNullOrWhiteSpace(item.DocumentPath) ? string.Empty : Url.Content(item.DocumentPath);
                 <div class="col-12 col-sm-6 col-lg-4 fade-in" style="animation-delay:@(delayStr + "s")">
                     <div class="product-card">
                         <div class="product-card__image">
                             <a href="@Url.Action("GetProductDetails", "WebSiteProducts", new { id = item.Id })">
-                                <img src="@imagePath" alt="@item.Title" />
+                                <img src="@item.DocumentPath" alt="@item.Title" />
                             </a>
                             <span class="product-card__badge">New</span>
                         </div>
                         <div class="product-card__body text-center">
                             <p class="product-card__price">৳ @item.Price.ToString("N0")</p>
                             <h3 class="product-card__title">
-                                <a href="@Url.Action("GetProductDetails", "WebSiteProducts", new { id = item.Id })">@item.Title</a>
+                                <a>@item.Title</a>
                             </h3>
                         </div>
                     </div>
@@ -263,19 +259,17 @@
                 var delayStr = delay.toFixed(1);
                 var priceValue = parseFloat(item.Price);
                 var formattedPrice = isNaN(priceValue) ? item.Price : priceValue.toLocaleString();
-                var detailUrl = '/WebSiteProducts/GetProductDetails/' + item.Id;
-                var imageUrl = item.DocumentPath ? item.DocumentPath.replace('~', '') : '';
                 var card = '<div class="col-12 col-sm-6 col-lg-4 fade-in" style="animation-delay:' + delayStr + 's">' +
                     '<div class="product-card">' +
                     '<div class="product-card__image">' +
-                    '<a href="' + detailUrl + '">' +
-                    '<img src="' + imageUrl + '" alt="' + item.Title + '">' +
+                    '<a href="/WebSiteProducts/GetProductDetails/' + item.Id + '">' +
+                    '<img src="' + item.DocumentPath + '" alt="' + item.Title + '">' +
                     '</a>' +
                     '<span class="product-card__badge">New</span>' +
                     '</div>' +
                     '<div class="product-card__body text-center">' +
                     '<p class="product-card__price">৳ ' + formattedPrice + '</p>' +
-                    '<h3 class="product-card__title"><a href="' + detailUrl + '">' + item.Title + '</a></h3>' +
+                    '<h3 class="product-card__title">' + item.Title + '</h3>' +
                     '</div></div></div>';
                 container.append(card);
                 delay += 0.1;
