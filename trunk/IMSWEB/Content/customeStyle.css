@@ -88,18 +88,78 @@ a[aria-expanded="true"] {
 
 .new-arrivel {
     position: relative;
+    background: radial-gradient(circle at top left, rgba(77, 212, 151, 0.35), transparent 60%),
+        radial-gradient(circle at bottom right, rgba(14, 116, 144, 0.3), transparent 55%),
+        #0f172a;
 }
 
-.mosa {
+.new-arrivel::before,
+.new-arrivel::after {
+    content: "";
     position: absolute;
-    top: 70px;
-    left: 0;
+    border-radius: 999px;
+    filter: blur(0);
+    opacity: 0.45;
 }
 
-.arv-btn a:hover {
-    color: #01ae6e !important;
-    border-bottom: 1px solid #01ae6e !important;
-    transition: 500ms !important;  
+.new-arrivel::before {
+    width: 420px;
+    height: 420px;
+    background: rgba(45, 212, 191, 0.35);
+    top: -180px;
+    right: -120px;
+}
+
+.new-arrivel::after {
+    width: 300px;
+    height: 300px;
+    background: rgba(59, 130, 246, 0.25);
+    bottom: -160px;
+    left: -120px;
+}
+
+.new-arrivals-intro {
+    color: #fff;
+}
+
+.new-arrivals-intro p {
+    max-width: 450px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.new-arrivals-showcase {
+    background: rgba(15, 23, 42, 0.55);
+    border-radius: 32px;
+    padding: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(10px);
+}
+
+.new-arrivals-showcase > div {
+    margin: 0;
+}
+
+.new-arrivals-badge {
+    background: linear-gradient(135deg, #22c55e, #0ea5e9);
+    color: #0f172a;
+    letter-spacing: 0.12em;
+    font-size: 0.7rem;
+}
+
+.new-arrivals-chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.5rem 1.1rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+    font-weight: 600;
+    backdrop-filter: blur(6px);
+}
+
+.new-arrivals-chip i {
+    color: #22d3ee;
 }
 
 /* Product Item style */
@@ -135,6 +195,12 @@ a[aria-expanded="true"] {
 .Product-item:hover span a {
     color: #01ae6e !important;
     transition: 500ms;
+}
+
+.arv-btn a:hover {
+    color: #01ae6e !important;
+    border-bottom: 1px solid #01ae6e !important;
+    transition: 500ms !important;
 }
 
 
