@@ -1658,8 +1658,15 @@ namespace IMSWEB
 
             #region WebsiteProducts,WEbsiteProductViewModel
             CreateMap<WebsiteProducts, WebsiteProductViewModels>()
+                .ForMember(vm => vm.Id, map => map.MapFrom(m => m.Id.ToString()))
                 .ForMember(vm => vm.Title, map => map.MapFrom(m => m.Title))
-                .ForMember(vm => vm.Description, map => map.MapFrom(m => m.Description));
+                .ForMember(vm => vm.Description, map => map.MapFrom(m => m.Description))
+                .ForMember(vm => vm.DocumentPath, map => map.MapFrom(m => m.DocumentPath))
+                .ForMember(vm => vm.Price, map => map.MapFrom(m => m.Price))
+                .ForMember(vm => vm.ProcutCategory, map => map.MapFrom(m => (EnumProcutCategory)m.ProcutCategory))
+                .ForMember(vm => vm.ConcernID, map => map.MapFrom(m => m.ConcernID == 0 ? string.Empty : m.ConcernID.ToString()))
+                .ForMember(vm => vm.CreateDate, map => map.MapFrom(m => m.CreateDate))
+                .ForMember(vm => vm.ConcernName, map => map.MapFrom(m => m.SisterConcern != null ? m.SisterConcern.Name : string.Empty));
             #endregion
 
             #region CashAccount, CashAccountVM

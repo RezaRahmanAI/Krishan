@@ -691,24 +691,33 @@ else
     </section>
 
 
-    <section class="py-5 new-arrivel">
-        <div class=" text-center mt-5 mb-5">
-            <div class="mosa">
-                <img src="~/Content/image/bg-img.png" alt="">
+    <section class="py-5 new-arrivel position-relative overflow-hidden">
+        <div class="container position-relative">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-5">
+                    <div class="new-arrivals-intro text-center text-lg-start">
+                        <span class="badge rounded-pill bg-gradient text-uppercase fw-semibold new-arrivals-badge">Fresh this week</span>
+                        <h1 class="display-5 fw-bold mt-3 text-white">New Arrivals</h1>
+                        <p class="lead text-white-50 mt-3">
+                            Discover thoughtfully crafted solutions for every concern. Explore curated drops that blend performance, design, and reliability.
+                        </p>
+                        <div class="d-flex flex-wrap justify-content-center justify-content-lg-start gap-2 mt-4">
+                            <span class="new-arrivals-chip"><i class="fa-solid fa-leaf me-2"></i>Eco-conscious</span>
+                            <span class="new-arrivals-chip"><i class="fa-solid fa-bolt me-2"></i>High performance</span>
+                            <span class="new-arrivals-chip"><i class="fa-solid fa-shield-halved me-2"></i>Trusted quality</span>
+                        </div>
+                        <a href="@Url.Action("AllActiveProduct", "WebSiteProducts")" class="btn btn-light rounded-pill px-4 mt-4 fw-semibold">
+                            Browse full collection
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <div class="new-arrivals-showcase">
+                        @{ Html.RenderAction("AllProductView", "WebSiteProducts"); }
+                    </div>
+                </div>
             </div>
-
-            <img src="~/Content/image/denger.png" alt="">
-
-            <h1 class="display-5 fw-bold">New Arrivals</h1>
-            <p class="fs-3">
-                Aenean pharetra magna ac placerat vestibulum lectus mauris ultrices eros ut pharetra sit <br>
-                amet aliquam id diam maecenas vitae suscipit tellus mauris a diam maecenas sed
-            </p>
         </div>
-
-
-        @{ Html.RenderAction("AllProductView", "WebSiteProducts"); }
-
     </section>
 
     <section class="custommer-says">
