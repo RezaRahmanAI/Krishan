@@ -4,55 +4,107 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<section class="py-5" style="background-color:#f5f6fa;">
-    <div class="container">
-        <div class="row g-5">
+@using System.Collections.Generic
+@using System.Linq
+@{
+    var galleryImages = (Model.DocInfos ?? new List<VMDocInfo>())
+        .Select(d => d.DocPath)
+        .Where(path => !string.IsNullOrWhiteSpace(path))
+        .ToList();
 
-            <!-- LEFT: Image Gallery -->
+    var primaryImage = !string.IsNullOrWhiteSpace(Model.DocumentPath)
+        ? Model.DocumentPath
+        : galleryImages.FirstOrDefault() ?? string.Empty;
+
+    if (!string.IsNullOrWhiteSpace(primaryImage))
+    {
+        galleryImages.Insert(0, primaryImage);
+    }
+
+    galleryImages = galleryImages
+        .Where(path => !string.IsNullOrWhiteSpace(path))
+        .Distinct()
+        .Take(6)
+        .ToList();
+
+    if (!galleryImages.Any() && !string.IsNullOrWhiteSpace(Model.DocumentPath))
+    {
+        galleryImages.Add(Model.DocumentPath);
+    }
+}
+
+<section class="product-hero py-5">
+    <div class="container position-relative">
+        <div class="row g-5 align-items-start">
             <div class="col-12 col-lg-6">
-                <div class="main-image rounded-4 overflow-hidden shadow-lg mb-4">
-                    <img id="mainProductImage"
-                         src="@Model.DocumentPath"
-                         alt="@Model.Title"
-                         class="w-100 object-fit-contain" />
-                </div>
+                <div class="product-gallery rounded-4 shadow-lg">
+                    <div class="product-gallery__main">
+                        <img id="mainProductImage"
+                             src="@primaryImage"
+                             alt="@Model.Title"
+                             class="w-100 h-100 object-fit-contain" />
+                        <span class="product-gallery__badge">New arrival</span>
+                    </div>
 
-                <div class="d-flex justify-content-start flex-wrap gap-3">
-                    <img src="@Model.DocumentPath"
-                         class="thumb-img active-thumb"
-                         onclick="changeImage(this)"
-                         alt="Thumbnail 1" />
-                    <img src="@Model.DocumentPath"
-                         class="thumb-img"
-                         onclick="changeImage(this)"
-                         alt="Thumbnail 2" />
-                    <img src="@Model.DocumentPath"
-                         class="thumb-img"
-                         onclick="changeImage(this)"
-                         alt="Thumbnail 3" />
-                    <img src="@Model.DocumentPath"
-                         class="thumb-img"
-                         onclick="changeImage(this)"
-                         alt="Thumbnail 4" />
+                    @if (galleryImages.Count > 1)
+                    {
+                        <div class="product-gallery__thumbs">
+                            @for (var i = 0; i < galleryImages.Count; i++)
+                            {
+                                var path = galleryImages[i];
+                                var isActive = i == 0;
+                                <img src="@path"
+                                     class="product-thumb @(isActive ? "active-thumb" : string.Empty)"
+                                     onclick="changeImage(this)"
+                                     alt="Thumbnail @(i + 1)"
+                                     data-image="@path" />
+                            }
+                        </div>
+                    }
                 </div>
             </div>
 
-            <!-- RIGHT: Product Info -->
             <div class="col-12 col-lg-6">
-                <h1 class="fw-bold mb-3 text-dark">@Model.Title</h1>
-                <p class="lead text-secondary mb-4">
-                    <i class="bi bi-cash-coin text-success me-2"></i>
-                    <strong class="text-dark">Price:</strong> ৳ @Model.Price
-                </p>
+                <div class="product-summary">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <span class="product-chip"><i class="fa-solid fa-tags me-2"></i>@Model.ProcutCategory</span>
+                        <span class="product-meta"><i class="fa-regular fa-clock me-2"></i>@Model.CreateDate.ToString("dd MMM yyyy")</span>
+                    </div>
 
-                <p class="text-dark lh-lg mb-4">
-                    @Model.Description
-                </p>
+                    <h1 class="product-title mt-4">@Model.Title</h1>
+                    <p class="product-price display-6 fw-bold mb-4">৳ @Model.Price.ToString("N0")</p>
 
-                <div class="mt-4">
-                    <a href="javascript:history.back()" class="btn btn-outline-primary px-4 py-2 rounded-pill hover-glow">
-                        <i class="bi bi-arrow-left-circle me-2"></i> Back to Products
-                    </a>
+                    <p class="product-description mb-4">@Model.Description</p>
+
+                    <div class="info-grid mt-4">
+                        <div class="info-tile">
+                            <span class="info-label">Product ID</span>
+                            <span class="info-value">@Model.Id</span>
+                        </div>
+                        <div class="info-tile">
+                            <span class="info-label">Concern</span>
+                            <span class="info-value">@(!string.IsNullOrWhiteSpace(Model.ConcernID) ? Model.ConcernID : "N/A")</span>
+                        </div>
+                        <div class="info-tile">
+                            <span class="info-label">Listed</span>
+                            <span class="info-value">@Model.CreateDate.ToString("MMM yyyy")</span>
+                        </div>
+                    </div>
+
+                    <div class="highlight-chips mt-4 d-flex flex-wrap gap-2">
+                        <span class="highlight-chip"><i class="fa-solid fa-layer-group me-2"></i>@(galleryImages.Count) media assets</span>
+                        <span class="highlight-chip"><i class="fa-solid fa-tag me-2"></i>@Model.ProcutCategory</span>
+                        <span class="highlight-chip"><i class="fa-regular fa-calendar me-2"></i>@Model.CreateDate.ToString("MMM yyyy") release</span>
+                    </div>
+
+                    <div class="cta-group d-flex flex-wrap gap-3 mt-5">
+                        <a href="@Url.Action("AllActiveProduct", "WebSiteProducts")" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold shadow-sm">
+                            Explore more products
+                        </a>
+                        <a href="javascript:history.back()" class="btn btn-outline-secondary px-4 py-2 rounded-pill">
+                            Back to catalog
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -66,7 +118,7 @@
             <h2 class="fw-bold text-dark">More Products You May Like</h2>
             <div class="underline mx-auto mt-3 mb-4"></div>
         </div>
-        <div class="row">
+        <div class="recommendation-collection">
             @{ Html.RenderAction("AllProductView", "WebSiteProducts"); }
         </div>
     </div>
@@ -80,76 +132,213 @@
         border-radius: 10px;
     }
 
-    /* Main Image */
-    .main-image {
-        width: 100%;
-        border-radius: 15px;
-        overflow: hidden;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-        background-color: #fff;
+    .product-hero {
+        position: relative;
+        background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 35%, #ecfeff 100%);
     }
 
-    .main-image img {
-        width: 100%;
-        height: auto; /* preserve full image */
-        object-fit: contain; /* prevent cropping */
-        transition: transform 0.4s ease;
+    .product-gallery {
+        background: #fff;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        border-radius: 28px;
     }
 
-    .main-image:hover img {
-        transform: scale(1.05);
+    .product-gallery__main {
+        position: relative;
+        background: radial-gradient(circle at top, rgba(14, 165, 233, 0.16), transparent 60%);
+        border-radius: 22px;
+        padding: 2.5rem;
+        min-height: 380px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    /* Thumbnails */
-    .thumb-img {
-        width: 80px;
-        height: 80px;
+    .product-gallery__badge {
+        position: absolute;
+        top: 1.25rem;
+        left: 1.25rem;
+        padding: 0.45rem 1rem;
+        border-radius: 999px;
+        background: rgba(59, 130, 246, 0.15);
+        color: #1d4ed8;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 0.7rem;
+    }
+
+    .product-gallery__thumbs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .product-thumb {
+        width: 82px;
+        height: 82px;
         object-fit: cover;
-        border-radius: 12px;
+        border-radius: 16px;
         border: 2px solid transparent;
         cursor: pointer;
+        background: #f8fafc;
         transition: all 0.3s ease;
     }
 
-    .thumb-img:hover {
-        border-color: #007bff;
-        transform: scale(1.1);
+    .product-thumb:hover {
+        transform: translateY(-4px);
+        border-color: rgba(14, 165, 233, 0.5);
     }
 
-    .active-thumb {
-        border-color: #28a745;
-        box-shadow: 0 0 8px rgba(0, 128, 0, 0.3);
+    .product-thumb.active-thumb {
+        border-color: #22c55e;
+        box-shadow: 0 12px 18px -12px rgba(34, 197, 94, 0.5);
     }
 
-    /* Button hover glow */
-    .hover-glow {
-        transition: all 0.3s ease;
+    .product-summary {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 32px;
+        padding: 2.5rem;
+        box-shadow: 0 25px 50px -35px rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(12px);
     }
 
-    .hover-glow:hover {
-        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
-        transform: translateY(-3px);
+    .product-title {
+        font-size: 2.25rem;
+        font-weight: 800;
+        color: #0f172a;
     }
 
-    /* Responsive */
+    .product-price {
+        color: #15803d;
+        text-shadow: 0 6px 18px rgba(34, 197, 94, 0.25);
+    }
+
+    .product-description {
+        color: #334155;
+        line-height: 1.7;
+        font-size: 1.05rem;
+    }
+
+    .product-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.45rem 1.1rem;
+        border-radius: 999px;
+        background: rgba(34, 197, 94, 0.15);
+        color: #166534;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 0.75rem;
+    }
+
+    .product-meta {
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+
+    .info-tile {
+        background: #f8fafc;
+        border-radius: 18px;
+        padding: 1rem 1.25rem;
+        box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.15);
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .info-label {
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-size: 0.68rem;
+        color: #94a3b8;
+        font-weight: 700;
+    }
+
+    .info-value {
+        font-weight: 600;
+        color: #1f2937;
+        word-break: break-word;
+    }
+
+    .highlight-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.55rem 1.15rem;
+        border-radius: 999px;
+        background: rgba(14, 165, 233, 0.12);
+        color: #0369a1;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .cta-group .btn-primary {
+        background: linear-gradient(135deg, #0ea5e9, #22c55e);
+        border: none;
+    }
+
+    .cta-group .btn-primary:hover {
+        box-shadow: 0 18px 35px -18px rgba(14, 165, 233, 0.65);
+        transform: translateY(-2px);
+    }
+
+    .cta-group .btn-outline-secondary:hover {
+        background-color: #0f172a;
+        color: #fff;
+    }
+
+    .recommendation-collection .new-arrivals-collection {
+        background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%);
+    }
+
     @@media (max-width: 991px) {
-        .main-image {
-            height: auto;
+        .product-gallery__main {
+            min-height: 320px;
+            padding: 2rem;
+        }
+
+        .product-summary {
+            padding: 2rem;
+        }
+
+        .product-title {
+            font-size: 2rem;
         }
     }
 
     @@media (max-width: 768px) {
-        .thumb-img {
-            width: 60px;
-            height: 60px;
+        .product-gallery {
+            padding: 1.25rem;
         }
 
-        h1 {
-            font-size: 22px;
+        .product-summary {
+            padding: 1.75rem;
         }
 
-        p.lead {
-            font-size: 16px;
+        .product-title {
+            font-size: 1.75rem;
+        }
+
+        .product-description {
+            font-size: 1rem;
+        }
+
+        .product-thumb {
+            width: 70px;
+            height: 70px;
         }
     }
 </style>
@@ -157,9 +346,10 @@
 <script>
     function changeImage(element) {
         const mainImg = document.getElementById("mainProductImage");
-        mainImg.src = element.src;
+        const newSrc = element.getAttribute("data-image") || element.src;
+        mainImg.src = newSrc;
 
-        document.querySelectorAll(".thumb-img").forEach(img => img.classList.remove("active-thumb"));
+        document.querySelectorAll(".product-thumb").forEach(img => img.classList.remove("active-thumb"));
         element.classList.add("active-thumb");
     }
 </script>
